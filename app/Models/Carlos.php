@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Carlos extends Model
 {
     use HasFactory;
+   
+    public function hola(){
+        return 'hola';
+    }
 }
