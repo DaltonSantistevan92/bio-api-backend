@@ -12,4 +12,8 @@ class Carlos extends Model
     public function hola(){
         return 'hola';
     }
+
+    public function cargarModelo(){
+        return 'modeloCargado';
+    }
 }
