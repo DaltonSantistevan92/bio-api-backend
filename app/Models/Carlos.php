@@ -16,4 +16,8 @@ class Carlos extends Model
     public function cargarModelo(){
         return 'modeloCargado';
     }
+
+    public function main_principal(){
+        return "Retorna el main principal";
+    }
 }
