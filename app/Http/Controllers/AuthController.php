@@ -12,11 +12,13 @@ class AuthController extends Controller
 {
 
     private $personaCtrl;
+    private $permisoCtrl;
 
     public function __construct()
     {
        
         $this->personaCtrl = new PersonaController();
+        $this->permisoCtrl = new PermisoController();
     }
 
     public function registro(Request $request){//app movil
@@ -108,7 +110,10 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
         $user->rol;   $user->persona;
-        $response = ['status' => true,'message' => 'Bienvenido','user' => $user, 'token' => $token ];
+
+        $menu = $this->permisoCtrl->permisos($user->rol->id);
+
+        $response = ['status' => true,'message' => 'Bienvenido','user' => $user, 'token' => $token , 'menu' => $menu ];
         return response()->json($response); 
     }
 

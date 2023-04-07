@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\RolController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,8 @@ Route::post('registro', [AuthController::class, 'registro']);
 
 //RUTAS PROTEGIDAS JWT  (Segunda forma)
 Route::middleware('jwt.verify')->group( function () {
+    
+    //ROL
     Route::get('rol/listar', [RolController::class, 'listarRol']);
 
 }); 
