@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\AsistenciaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\RolController;
+use App\Http\Controllers\Tipo_RegistroController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -42,9 +44,18 @@ Route::post('registro', [AuthController::class, 'registro']);
 
 //RUTAS PROTEGIDAS JWT  (Segunda forma)
 Route::middleware('jwt.verify')->group( function () {
-    
+
     //ROL
     Route::get('rol/listar', [RolController::class, 'listarRol']);
+    
+    //ASISTENCIA
+    Route::post('asistencia', [AsistenciaController::class, 'registrarAsistencia']);
+    Route::get('getDateTime', [AsistenciaController::class, 'getDateTime']);
+
+    //TIPOS
+    Route::get('getTipos', [Tipo_RegistroController::class, 'getTipos']);
+
+
 
 }); 
 
