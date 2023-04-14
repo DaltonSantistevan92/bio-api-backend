@@ -15,6 +15,22 @@ class AsistenciaController extends Controller
 
     }
 
+    public function buscarUltimaAsistencia($user_id){
+        $asistenciaUltimo = Asistencia::where('user_id',$user_id)
+                                        ->where('fecha', date('Y-m-d'))->get();
+
+        if ($asistenciaUltimo->count() > 0) {
+            foreach($asistenciaUltimo as $item){
+                $ultimoTipo = $item->tipo_registro_id;
+            }
+        } else {
+            $ultimoTipo = '';
+        }                               
+        return response()->json($ultimoTipo);  
+    }
+
+    
+
     public function registrarAsistencia(Request $request){
         $requestAsistencia = (object) $request->asistencia;
         $requestUbicaciones = (object) $request->ubicacion;
@@ -33,20 +49,17 @@ class AsistenciaController extends Controller
             $newAsistencia->estado = 'A';
 
             $existeTipo = Asistencia::where('user_id', $requestAsistencia->user_id)
-                                    ->where('tipo_registro_id', $requestAsistencia->tipo_registro_id)
-                                    ->get()->first();
+                                    ->where('fecha',date('Y-m-d'))
+                                    ->get()->count();
 
-           /*  if ($existeTipo) {
-                //
+            if ($existeTipo === 4) {
                 $response = [
                     'status' => false,
-                    'mensaje' => 'Existe una asistencia de tipo ' .$existeTipo->tipo_registro->tipo,
+                    'message' => 'Cumplio sus horas laborables el dia : ' .date('Y-m-d'),
                 ];
             }
-            else{ */
+            else{
                 if ($newAsistencia->save()) {
-                    //registro la ubicaciones
-
                     $respUbicacion = $this->ubicacionCtrl->registrarUbicaciones($newAsistencia->id, $requestUbicaciones);
 
                     $response = [
@@ -64,7 +77,7 @@ class AsistenciaController extends Controller
                         'data' => null,
                     ];
                 }
-           /*  } */
+            }
         } else {
             $response = [
                 'status' => false,
