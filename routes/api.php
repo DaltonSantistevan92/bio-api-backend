@@ -51,6 +51,7 @@ Route::middleware('jwt.verify')->group( function () {
     //ASISTENCIA
     Route::post('asistencia', [AsistenciaController::class, 'registrarAsistencia']);
     Route::get('getDateTime', [AsistenciaController::class, 'getDateTime']);
+    Route::get('search/{user_id}', [AsistenciaController::class, 'buscarUltimaAsistencia']);
 
     //TIPOS
     Route::get('getTipos', [Tipo_RegistroController::class, 'getTipos']);
