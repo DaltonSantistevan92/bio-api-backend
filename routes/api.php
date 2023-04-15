@@ -42,6 +42,7 @@ Route::group( ['middleware' => ['auth:sanctum'] ], function (){
 Route::post('login', [AuthController::class, 'login']);//appMovil
 Route::post('registro', [AuthController::class, 'registro']);
 
+
 //RUTAS PROTEGIDAS JWT  (Segunda forma)
 Route::middleware('jwt.verify')->group( function () {
 
@@ -53,11 +54,11 @@ Route::middleware('jwt.verify')->group( function () {
     Route::get('getDateTime', [AsistenciaController::class, 'getDateTime']);
     Route::get('search/{user_id}', [AsistenciaController::class, 'buscarUltimaAsistencia']);
 
+    //TIPO ASISTENCIA
+    Route::get('getTipoAsistencia', [AsistenciaController::class, 'cargarTipoAsistencia']);
+
     //TIPOS
     Route::get('getTipos', [Tipo_RegistroController::class, 'getTipos']);
-
-
-
 }); 
 
 
