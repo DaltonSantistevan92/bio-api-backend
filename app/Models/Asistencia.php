@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\{User,Tipo_Registro,Ubicacion, Tipo_Asistencia};
+use App\Models\{User,Tipo_Registro,Ubicacion,Tipo_Asistencia, Asistencias_Departamentos};
 
 class Asistencia extends Model
 {
@@ -19,6 +19,10 @@ class Asistencia extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function tipo_asistencia(){
+        return $this->belongsTo(Tipo_Asistencia::class);
+    }
+
     public function tipo_registro(){//muchoss a uno
         return $this->belongsTo(Tipo_Registro::class);
     }
@@ -27,7 +31,7 @@ class Asistencia extends Model
         return $this->hasMany(Ubicacion::class);
     }
 
-    public function tipo_asistencia(){
-        return $this->belongsTo(Tipo_Asistencia::class);
+    public function asistencias_departamento(){
+        return $this->hasMany(Asistencias_Departamentos::class);
     }
 }

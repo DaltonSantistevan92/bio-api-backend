@@ -108,7 +108,6 @@ class AsistenciaController extends Controller
         $requestUbicaciones = (object) $request->ubicacion;
         $response = [];
 
-
         //Validar con las ubicaciones  de la table geolocalizacion 
 
         if ($requestAsistencia) {
@@ -166,7 +165,7 @@ class AsistenciaController extends Controller
                     }else{
                         $response = [
                             'status' => false,
-                            'message' => 'ERROR',
+                            'message' => 'No se pudo registrar la asistencia',
                         ];
                     }
                 }else {//no hay eventos
