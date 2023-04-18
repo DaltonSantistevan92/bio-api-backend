@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Asistencia,Tipo_Asistencia,Asistencia_Eventos};
+use App\Models\{Asistencia,Tipo_Asistencia,Asistencia_Eventos, Asistencias_Departamentos};
 use Illuminate\Http\Request;
 
 class AsistenciaController extends Controller
 {
     private $ubicacionCtrl;
     private $eventnCtrl;
+    private $geoDepCtrl;
+
 
     public function __construct()
     {
         $this->ubicacionCtrl = new UbicacionController();
         $this->eventnCtrl = new EventoController();
+        $this->geoDepCtrl = new Geolocalizacion_DepartamentoController();
     }
 
     public function cargarTipoAsistencia(){
@@ -108,43 +111,59 @@ class AsistenciaController extends Controller
         $requestUbicaciones = (object) $request->ubicacion;
         $response = [];
 
-        //Validar con las ubicaciones  de la table geolocalizacion 
-
         if ($requestAsistencia) {
 
             if ($requestAsistencia->tipo_asistencia_id === 1) {//asistencia
-                $newAsistencia = $this->saveAsistencia($requestAsistencia);
 
-                $existeTipo = Asistencia::where('user_id', $requestAsistencia->user_id)
-                                    ->where('tipo_asistencia_id' ,'=', 1)
-                                    ->where('fecha',date('Y-m-d'))
-                                    ->get()->count();
+                $requUbicacion = $this->geoDepCtrl->validarGeolocalizacion( $requestUbicaciones );
 
-                if ($existeTipo === 4) {
-                    $response = [
-                        'status' => false,
-                        'message' => 'Cumplio sus horas laborables el dia : ' .date('Y-m-d'),
-                    ];
-                } else {
-                    if ($newAsistencia->save()) {
-                        $respUbicacion = $this->ubicacionCtrl->registrarUbicaciones($newAsistencia->id, $requestUbicaciones);
+                if ($requUbicacion['status'] == true) {  //Validar con las ubicaciones  de la table geolocalizacion 
+                    $departamento_id = $requUbicacion['ubicacion']->departamento_id;
 
-                        $response = [
-                            'status' => true,
-                            'message' => 'La asistencia se registro correctamente',
-                            'data' => [
-                                'asistencia' => $newAsistencia,
-                                'ubicacion' => $respUbicacion
-                            ]
-                        ];
-                    } else {
+                    $newAsistencia = $this->saveAsistencia($requestAsistencia);
+
+                    $existeTipo = Asistencia::where('user_id', $requestAsistencia->user_id)
+                                        ->where('tipo_asistencia_id' ,'=', 1)
+                                        ->where('fecha',date('Y-m-d'))
+                                        ->get()->count();
+    
+                    if ($existeTipo === 4) {
                         $response = [
                             'status' => false,
-                            'message' => 'No se puede registrar la asistencia',
-                            'data' => null,
+                            'message' => 'Cumplio sus horas laborables el dia : ' .date('Y-m-d'),
                         ];
-                    }
-                } 
+                    } else {
+                        if ($newAsistencia->save()) {
+                            $respUbicacion = $this->ubicacionCtrl->registrarUbicaciones($newAsistencia->id, $requestUbicaciones);
+
+                            $registraAsitenciaDepartamento = new Asistencias_Departamentos();
+                            $registraAsitenciaDepartamento->asistencia_id = $newAsistencia->id;
+                            $registraAsitenciaDepartamento->departamento_id = $departamento_id;
+                            $registraAsitenciaDepartamento->save();
+
+                            $response = [
+                                'status' => true,
+                                'message' => 'La asistencia se registro correctamente',
+                                'data' => [
+                                    'asistencia' => $newAsistencia,
+                                    'ubicacion' => $respUbicacion,
+                                    'asistencia_departamento' => $registraAsitenciaDepartamento
+                                ]
+                            ];
+                        } else {
+                            $response = [
+                                'status' => false,
+                                'message' => 'No se puede registrar la asistencia',
+                                'data' => null,
+                            ];
+                        }
+                    } 
+                }else {
+                    $response = [
+                        'status' => false,
+                        'message' => $requUbicacion['message'],
+                    ];
+                }
             }else{//evento
                 $returnEvento = $this->eventnCtrl->buscarEventos(date('Y-m-d'));
 
