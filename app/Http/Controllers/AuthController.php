@@ -39,7 +39,8 @@ class AuthController extends Controller
                     'persona_id' => $persona_id,
                     'rol_id' => 4,
                     'email' => $requestUser['email'], 
-                    'password' => $encriptarPassword
+                    'password' => $encriptarPassword,
+                    'imagen' => 'user-default.jpg'
                 ]);
 
                 $token = JWTAuth::fromUser($user);

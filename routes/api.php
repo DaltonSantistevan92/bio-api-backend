@@ -7,6 +7,7 @@ use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\Tipo_RegistroController;
+use App\Http\Controllers\ToolController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -45,15 +46,6 @@ Route::group( ['middleware' => ['auth:sanctum'] ], function (){
 Route::post('login', [AuthController::class, 'login']);//appMovil
 Route::post('registro', [AuthController::class, 'registro']);
 
-Route::get('validarGeolocalizacion', [Geolocalizacion_DepartamentoController::class, 'validarGeolocalizacion']);
-
-
-
-//ruta de prueba
-
-
-
-
 
 //RUTAS PROTEGIDAS JWT  (Segunda forma)
 Route::middleware('jwt.verify')->group( function () {
@@ -74,8 +66,12 @@ Route::middleware('jwt.verify')->group( function () {
 
     //ACTUALIZAR INFORMACION DEL USUARIO
     Route::post('updateDataUser', [UsuarioController::class, 'updateDataUser']);
+
+    
 }); 
 
+Route::get('mostrarImagen/{carpeta}/{archivo}',[ ToolController::class, 'mostrarImagen' ]);
+Route::post('subirArchivo',[ ToolController::class, 'subirArchivo' ]);
 
 
 
