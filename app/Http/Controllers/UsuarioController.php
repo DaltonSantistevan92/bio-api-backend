@@ -13,34 +13,30 @@ class UsuarioController extends Controller
         $requestPerson = (object) $request->persona;
         $response = [];
 
-        $imagenDefault = 'user-default.jpg';
+        $imagenDefault = "user-default.jpg";
         
         //Search Id user
         $dataUser = User::find($requestUser->user_id);
         $cargo = $dataUser->rol->cargo;
 
         if($requestUser){
-       
             if($dataUser){
                 //Update Data User
                 $dataUser->name = $requestUser->name;
                 $dataUser->email = $requestUser->email;
-
-                if ($requestUser->imagen === '' || $requestUser->imagen === $imagenDefault) {
-                    $dataUser->imagen = $imagenDefault;
-                }else{
-                    $dataUser->imagen = $requestUser->imagen;
-                }
-
+                $dataUser->imagen = $requestUser->imagen;
+                
                 //Update Data Person
                 $dataPerson = Persona::find($requestPerson->persona_id);
-                //$dataPerson->cedula = $requestPerson->cedula;
+                $dataPerson->cedula = $requestPerson->cedula;
                 $dataPerson->nombres = $requestPerson->nombres;
                 $dataPerson->apellidos = $requestPerson->apellidos;
                 $dataPerson->num_celular = $requestPerson->num_celular;
                 $dataPerson->direccion = $requestPerson->direccion;
                 $dataPerson->save();
                 $dataUser->save(); 
+
+                $dataUser->persona;    $dataUser->rol;
 
                 $response = [
                     'status' => true,
