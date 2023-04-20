@@ -67,6 +67,8 @@ Route::middleware('jwt.verify')->group( function () {
     //ACTUALIZAR INFORMACION DEL USUARIO
     Route::post('updateDataUser', [UsuarioController::class, 'updateDataUser']);
 
+    Route::post('updatePassword', [UsuarioController::class, 'updatePassword']);
+
     
 }); 
 

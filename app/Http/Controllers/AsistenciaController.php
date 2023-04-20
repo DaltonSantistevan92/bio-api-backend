@@ -45,67 +45,6 @@ class AsistenciaController extends Controller
         return response()->json($ultimoTipo);  
     }
 
-
-    /* public function registrarAsistencia(Request $request){
-        $requestAsistencia = (object) $request->asistencia;
-        $requestUbicaciones = (object) $request->ubicacion;
-
-
-        //Validar con las ubicaciones  de la table geolocalizacion 
-        
-        
-        $response = [];
-
-        if ($requestAsistencia) {
-            $newAsistencia = new Asistencia();
-            $newAsistencia->user_id = $requestAsistencia->user_id;
-            $newAsistencia->tipo_asistencia_id = $requestAsistencia->tipo_asistencia_id;  //Tipo de Asistencia
-            $newAsistencia->tipo_registro_id = $requestAsistencia->tipo_registro_id;//1 entrada
-            $newAsistencia->fecha = date('Y-m-d');
-            $newAsistencia->hora = date('H:i:s');
-            $newAsistencia->estado = 'A';
-
-            $existeTipo = Asistencia::where('user_id', $requestAsistencia->user_id)
-                                    ->where('fecha',date('Y-m-d'))
-                                    ->get()->count();
-
-            if ($existeTipo === 4) {
-                $response = [
-                    'status' => false,
-                    'message' => 'Cumplio sus horas laborables el dia : ' .date('Y-m-d'),
-                ];
-            }
-            else{
-                if ($newAsistencia->save()) {
-                    $respUbicacion = $this->ubicacionCtrl->registrarUbicaciones($newAsistencia->id, $requestUbicaciones);
-
-                    $response = [
-                        'status' => true,
-                        'message' => 'La asistencia se registro correctamente',
-                        'data' => [
-                            'asistencia' => $newAsistencia,
-                            'ubicacion' => $respUbicacion
-                        ]
-                    ];
-                } else {
-                    $response = [
-                        'status' => false,
-                        'message' => 'No se puede registrar la asistencia',
-                        'data' => null,
-                    ];
-                }
-            }
-        } else {
-            $response = [
-                'status' => false,
-                'message' => 'No hay datos para procesar',
-                'data' => null,
-            ];
-        }
-        return response()->json($response);
-    } */
-
-
     public function registrarAsistencia(Request $request){
         $requestAsistencia = (object) $request->asistencia;
         $requestUbicaciones = (object) $request->ubicacion;
