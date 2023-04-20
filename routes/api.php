@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\Tipo_RegistroController;
+use App\Http\Controllers\UbicacionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +43,14 @@ Route::group( ['middleware' => ['auth:sanctum'] ], function (){
 Route::post('login', [AuthController::class, 'login']);//appMovil
 Route::post('registro', [AuthController::class, 'registro']);
 
+Route::get('cargarUbicaciones', [UbicacionController::class, 'cargarUbicaciones']);
+
+
+//Tipo Asistencia
+
+
+
+
 //RUTAS PROTEGIDAS JWT  (Segunda forma)
 Route::middleware('jwt.verify')->group( function () {
 
@@ -55,6 +64,8 @@ Route::middleware('jwt.verify')->group( function () {
 
     //TIPOS
     Route::get('getTipos', [Tipo_RegistroController::class, 'getTipos']);
+
+    Route::get('getTipoAsistencia', [AsistenciaController::class, 'cargarTipoAsistencia']);
 
 
 

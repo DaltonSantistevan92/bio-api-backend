@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asistencia;
+use App\Models\Tipo_asistencia;
 use Illuminate\Http\Request;
 
 class AsistenciaController extends Controller
@@ -12,6 +13,21 @@ class AsistenciaController extends Controller
     public function __construct()
     {
         $this->ubicacionCtrl = new UbicacionController();
+        //Hola mundo desde el backend
+    }
+
+    public function cargarTipoAsistencia(){
+        $response = [];
+        $tipo_asistencia = Tipo_asistencia::all();
+
+        if($tipo_asistencia->count() > 0){
+            $response = ['status' => true, 'message' => 'Tipos de Asistencia cargados correctamente', 'data' => $tipo_asistencia];
+
+        }else{
+            $response = ['status' => false, 'message' => 'No existen tipos de asistencias', 'data' => null];
+        }
+
+        return response()->json($response, 200);
 
     }
 
