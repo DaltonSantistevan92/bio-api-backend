@@ -2,11 +2,15 @@
 
 use App\Http\Controllers\AsistenciaController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Geolocalizacion_DepartamentoController;
 use App\Http\Controllers\PermisoController;
+use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\Tipo_RegistroController;
+use App\Http\Controllers\ToolController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +46,7 @@ Route::group( ['middleware' => ['auth:sanctum'] ], function (){
 Route::post('login', [AuthController::class, 'login']);//appMovil
 Route::post('registro', [AuthController::class, 'registro']);
 
+
 //RUTAS PROTEGIDAS JWT  (Segunda forma)
 Route::middleware('jwt.verify')->group( function () {
 
@@ -53,13 +58,20 @@ Route::middleware('jwt.verify')->group( function () {
     Route::get('getDateTime', [AsistenciaController::class, 'getDateTime']);
     Route::get('search/{user_id}', [AsistenciaController::class, 'buscarUltimaAsistencia']);
 
+    //TIPO ASISTENCIA
+    Route::get('getTipoAsistencia', [AsistenciaController::class, 'cargarTipoAsistencia']);
+
     //TIPOS
     Route::get('getTipos', [Tipo_RegistroController::class, 'getTipos']);
 
+    //ACTUALIZAR INFORMACION DEL USUARIO
+    Route::post('updateDataUser', [UsuarioController::class, 'updateDataUser']);
 
-
+    
 }); 
 
+Route::get('mostrarImagen/{carpeta}/{archivo}',[ ToolController::class, 'mostrarImagen' ]);
+Route::post('subirArchivo',[ ToolController::class, 'subirArchivo' ]);
 
 
 
