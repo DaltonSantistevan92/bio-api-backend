@@ -57,6 +57,9 @@ Route::middleware('jwt.verify')->group( function () {
     Route::post('asistencia', [AsistenciaController::class, 'registrarAsistencia']);
     Route::get('getDateTime', [AsistenciaController::class, 'getDateTime']);
     Route::get('search/{user_id}', [AsistenciaController::class, 'buscarUltimaAsistencia']);
+     
+    //REPORTE DE ASISTENCIA
+     Route::get('reporte/{user_id}/{f_inicio}/{f_fin}/{tipo_asistencia_id}', [AsistenciaController::class, 'reporte']);
 
     //TIPO ASISTENCIA
     Route::get('getTipoAsistencia', [AsistenciaController::class, 'cargarTipoAsistencia']);
@@ -68,6 +71,11 @@ Route::middleware('jwt.verify')->group( function () {
     Route::post('updateDataUser', [UsuarioController::class, 'updateDataUser']);
 
     Route::post('updatePassword', [UsuarioController::class, 'updatePassword']);
+
+   
+
+
+
 
     
 }); 

@@ -161,4 +161,60 @@ class AsistenciaController extends Controller
         $newAsistencia->estado = 'A';
         return $newAsistencia;
     }
+
+
+    public function reporte($user_id, $f_inicio, $f_fin, $tipo_asistencia_id){//solo trabajador
+        $response = [];
+
+        $asistencias = Asistencia::where('estado','A')->where('user_id',intval($user_id))
+                                    ->where('fecha', '>=', $f_inicio)->where('fecha', '<=', $f_fin)
+                                    ->where('tipo_asistencia_id', intval($tipo_asistencia_id))->get();
+
+        if (count($asistencias) > 0) {
+
+            if (intval($tipo_asistencia_id) == 1) {
+                foreach($asistencias as $item){
+                    $item->user->persona;
+                    $item->tipo_asistencia;
+                    $item->tipo_registro;
+
+                    foreach($item->ubicacion as $ubi){
+                        $ubi;
+                    }
+    
+                    foreach( $item->asistencias_departamento as $ad){
+                        $ad->departamento;
+                    }
+                }
+                $response = [
+                    'status' => true,
+                    'message' => 'existen datos de asistencias',
+                    'data' => $asistencias
+                ];  
+            }else{
+                foreach($asistencias as $item){
+                    $item->user->persona;
+                    $item->tipo_asistencia;
+                    $item->tipo_registro;
+    
+                    foreach($item->asistencia_evento as $asev){
+                        $asev->evento;
+                    }
+                }
+    
+                $response = [
+                    'status' => true,
+                    'message' => 'existen datos de evento',
+                    'data' => $asistencias
+                ]; 
+            }
+        }else{
+            $response = [
+                'status' => false,
+                'message' => 'no existen datos',
+                'data' => null
+            ];
+        }  
+        return response()->json($response);
+    }
 }
