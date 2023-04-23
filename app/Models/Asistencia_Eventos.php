@@ -4,8 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Asistencia;
-use App\Models\Evemto;
+use App\Models\{Asistencia,Evento};
 
 class Asistencia_Eventos extends Model
 {
@@ -16,11 +15,11 @@ class Asistencia_Eventos extends Model
     public $timestamps = false;
 
 
-    public function Asistencias(){
+    public function asistencia(){
         return $this->belongsTo(Asistencia::class);
     }
 
-    public function Eventos(){
+    public function evento(){
         return $this->belongsTo(Evento::class);
     }
 

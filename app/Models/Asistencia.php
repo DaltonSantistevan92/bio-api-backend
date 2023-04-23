@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\{User,Tipo_Registro,Ubicacion,Tipo_Asistencia, Asistencias_Departamentos};
+use App\Models\{User,Tipo_Registro,Ubicacion,Tipo_Asistencia, Asistencias_Departamentos, Asistencia_Eventos};
 
 class Asistencia extends Model
 {
@@ -33,5 +33,9 @@ class Asistencia extends Model
 
     public function asistencias_departamento(){
         return $this->hasMany(Asistencias_Departamentos::class);
+    }
+
+    public function asistencia_evento(){
+        return $this->hasMany(Asistencia_Eventos::class);
     }
 }
