@@ -279,7 +279,10 @@ class AsistenciaController extends Controller
                 $response = [
                     'status' => true,
                     'message' => 'existen datos de asistencias',
-                    'data' => $asistencias
+                    'data' => $asistencias,
+                    'datos_personales' => [
+                        'user' => $item->user,
+                    ]
                 ];  
             }else{
                 foreach($asistencias as $item){
