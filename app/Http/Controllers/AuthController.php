@@ -39,7 +39,8 @@ class AuthController extends Controller
                     'persona_id' => $persona_id,
                     'rol_id' => 4,
                     'email' => $requestUser['email'], 
-                    'password' => $encriptarPassword
+                    'password' => $encriptarPassword,
+                    'imagen' => 'user-default.jpg'
                 ]);
 
                 $token = JWTAuth::fromUser($user);
@@ -100,11 +101,11 @@ class AuthController extends Controller
         try {
             if (!$token = JWTAuth::attempt($credenciales)) {
                 $response = [ 'status' => false, 'message' => 'El correo o las credenciales son invalidas'];
-                return response()->json($response, 400);
+                return response()->json($response);
             }
         } catch (\Throwable $th) {
             $response = [ 'status' => false, 'message' => 'Error del Servidor'];
-            return response()->json($response, 500);
+            return response()->json($response);
         }
         //compact('token')
 
