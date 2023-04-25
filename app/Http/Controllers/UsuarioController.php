@@ -44,6 +44,7 @@ class UsuarioController extends Controller
         return response()->json($response);
     }
     
+
     public function updateDataUser(Request $request){
         $requestUser = (object) $request->usuario;
         $requestPerson = (object) $request->persona;
@@ -57,14 +58,14 @@ class UsuarioController extends Controller
 
         if($requestUser){
 
-            $existeCedula = Persona::where('cedula',$cedula)->get()->first();
+            /* $existeCedula = Persona::where('cedula',$cedula)->get()->first();
 
             if ($existeCedula) {
                 $response = [
                     'status' => false,
                     'message' => 'La cédula ya existe',
                 ];
-            }else {
+            }else { */
                 if($dataUser){
                     //Update Data User
                     $dataUser->name = $requestUser->name;
@@ -94,7 +95,7 @@ class UsuarioController extends Controller
                         'message' => 'Error. No se puede actualizar tu información.'
                     ];
                 }  
-            } 
+           /*  }  */
         }else{
             $response = [
                 'status' => false,
@@ -103,4 +104,5 @@ class UsuarioController extends Controller
         }
         return response()->json($response);
     }
+   
 }

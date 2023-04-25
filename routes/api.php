@@ -7,6 +7,7 @@ use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\Tipo_RegistroController;
+use App\Http\Controllers\ToolController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +46,7 @@ Route::group( ['middleware' => ['auth:sanctum'] ], function (){
 Route::post('login', [AuthController::class, 'login']);//appMovil
 Route::post('registro', [AuthController::class, 'registro']);
 
+
 //RUTAS PROTEGIDAS JWT  (Segunda forma)
 Route::middleware('jwt.verify')->group( function () {
 
@@ -54,7 +56,13 @@ Route::middleware('jwt.verify')->group( function () {
     //ASISTENCIA
     Route::post('asistencia', [AsistenciaController::class, 'registrarAsistencia']);
     Route::get('getDateTime', [AsistenciaController::class, 'getDateTime']);
-    Route::get('search/{user_id}', [AsistenciaController::class, 'buscarUltimaAsistencia']);
+
+    
+
+    Route::get('search/{user_id}', [AsistenciaController::class, 'buscarUltimoTipo']);
+    Route::get('buscarUltimoTipoAsistencia/{user_id}', [AsistenciaController::class, 'buscarUltimoTipoAsistencia']);
+
+
      
     //REPORTE DE ASISTENCIA
      Route::get('reporte/{user_id}/{f_inicio}/{f_fin}/{tipo_asistencia_id}', [AsistenciaController::class, 'reporte']);
@@ -65,12 +73,10 @@ Route::middleware('jwt.verify')->group( function () {
     //TIPOS
     Route::get('getTipos', [Tipo_RegistroController::class, 'getTipos']);
 
+    //ACTUALIZAR INFORMACION DEL USUARIO
+    Route::post('updateDataUser', [UsuarioController::class, 'updateDataUser']);
 
     Route::post('updatePassword', [UsuarioController::class, 'updatePassword']);
-
-   
-
-
 
 
     

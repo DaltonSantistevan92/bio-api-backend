@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Asistencia;
+use App\Models\{Asistencia,Tipo_Asistencia,Asistencia_Eventos, Asistencias_Departamentos, Evento};
 use Illuminate\Http\Request;
 
 class AsistenciaController extends Controller
@@ -15,10 +15,26 @@ class AsistenciaController extends Controller
     public function __construct()
     {
         $this->ubicacionCtrl = new UbicacionController();
-
+        $this->eventnCtrl = new EventoController();
+        $this->geoDepCtrl = new Geolocalizacion_DepartamentoController();
     }
 
-    public function buscarUltimaAsistencia($user_id){
+    
+
+    public function cargarTipoAsistencia(){
+        $response = [];
+        $tipo_asistencia = Tipo_Asistencia::all();
+
+        if($tipo_asistencia->count() > 0){
+          $response = ['status' => true, 'message' => 'Tipos de asistencia cargadas con éxito.', 'data' => $tipo_asistencia ];
+        }else{
+          $response = ['status' => false, 'message' => 'No hay tipos de Asistencia.', 'data' => null ];
+        }
+
+        return response()->json($response, 200);
+    } 
+
+    /* public function buscarUltimoTipo($user_id){
         $asistenciaUltimo = Asistencia::where('user_id',$user_id)->where('tipo_asistencia_id' ,'=', 1)->where('fecha', date('Y-m-d'))->get();
 
         if ($asistenciaUltimo->count() > 0) {
@@ -30,6 +46,82 @@ class AsistenciaController extends Controller
         }                               
         return response()->json($ultimoTipo);  
     }
+
+    public function buscarUltimoTipoAsistencia($user_id){
+        $asistenciaUltimo = Asistencia::where('user_id',$user_id)->where('tipo_asistencia_id' ,'=', 1)->where('fecha', date('Y-m-d'))->get();
+
+        if ($asistenciaUltimo->count() > 0) {
+            foreach($asistenciaUltimo as $item){
+                $ultimoTipoAsistencia = $item->tipo_asistencia_id;
+            }
+        } else {
+            $ultimoTipoAsistencia = '';
+        }                               
+        return response()->json($ultimoTipoAsistencia);  
+    } */
+
+
+    public function buscarUltimoTipo($user_id){
+        $asistenciaUltimo = Asistencia::where('user_id',$user_id)->where('fecha', date('Y-m-d'))->get();
+
+        if ($asistenciaUltimo->count() > 0) {
+            foreach($asistenciaUltimo as $item){
+                $ultimoTipo = $item->tipo_registro_id;
+            }
+        } else {
+            $ultimoTipo = '';
+        }                               
+        return response()->json($ultimoTipo);  
+    }
+
+    public function buscarUltimoTipoAsistencia($user_id){
+        //preguntar si existe un evento
+        $evento = Evento::where('fecha', date('Y-m-d'))->get()->first();
+        if ($evento) {
+            $response = [
+                'status' => true,
+                'message' => 'Existe el evento '. $evento->nombre,
+                'data' => $evento,
+                'tipo_asistencia_id' => 2
+            ];
+        }else{
+            //verificar si existe el usuario en la tabla asistencia
+            $existeUserAsistencia = Asistencia::where('user_id',$user_id)->where('fecha', date('Y-m-d'))->get()->first();
+
+            if ($existeUserAsistencia) {
+
+                $asistenciaUltimo = Asistencia::where('user_id',$user_id)->where('fecha', date('Y-m-d'))->get();
+
+                if ($asistenciaUltimo->count() > 0 ) {
+                    foreach($asistenciaUltimo as $item){
+                        $ultimoTipoAsistencia = $item->tipo_asistencia_id;
+                    }
+
+                    $response = [
+                        'status' => true,
+                        'message' => 'existe datos',
+                        'tipo_asistencia_id' => $ultimoTipoAsistencia
+                    ];
+                    
+                }else {
+                    $response = [
+                        'status' => false,
+                        'message' => 'No hay datos para procesar',
+                        'tipo_asistencia_id' => 0
+                    ];
+                }  
+            }else {
+                $response = [
+                    'status' => false,
+                    'message' => 'Se va hacer el primer registro para el usuario',
+                    'tipo_asistencia_id' => 1
+                ];
+            }
+        }
+        return response()->json($response);  
+    }
+
+    
 
     public function registrarAsistencia(Request $request){
         $requestAsistencia = (object) $request->asistencia;
@@ -96,21 +188,33 @@ class AsistenciaController extends Controller
                     $newAsistencia = $this->saveAsistencia($requestAsistencia);
                     $evento_id = $returnEvento['evento_id'];
 
-                    if ($newAsistencia->save()) {
-                        $newAsistenciaEventos = new Asistencia_Eventos();
-                        $newAsistenciaEventos->asistencia_id = $newAsistencia->id;
-                        $newAsistenciaEventos->evento_id = $evento_id;
-                        $newAsistenciaEventos->save();
+                    $existeTipo = Asistencia::where('user_id', $requestAsistencia->user_id)
+                                        ->where('tipo_asistencia_id' ,'=', 2)
+                                        ->where('fecha',date('Y-m-d'))
+                                        ->get()->count();
 
-                        $response = [
-                            'status' => true,
-                            'message' => 'La asistencia se registro correctamente',
-                        ];
-                    }else{
+                    if ($existeTipo === 4) {
                         $response = [
                             'status' => false,
-                            'message' => 'No se pudo registrar la asistencia',
+                            'message' => 'Cumplio sus horas laborables el dia : ' .date('Y-m-d'),
                         ];
+                    } else{
+                        if ($newAsistencia->save()) {
+                            $newAsistenciaEventos = new Asistencia_Eventos();
+                            $newAsistenciaEventos->asistencia_id = $newAsistencia->id;
+                            $newAsistenciaEventos->evento_id = $evento_id;
+                            $newAsistenciaEventos->save();
+    
+                            $response = [
+                                'status' => true,
+                                'message' => 'La asistencia se registro correctamente',
+                            ];
+                        }else{
+                            $response = [
+                                'status' => false,
+                                'message' => 'No se pudo registrar la asistencia',
+                            ];
+                        }
                     }
                 }else {//no hay eventos
                     $response = [
@@ -175,7 +279,10 @@ class AsistenciaController extends Controller
                 $response = [
                     'status' => true,
                     'message' => 'existen datos de asistencias',
-                    'data' => $asistencias
+                    'data' => $asistencias,
+                    'datos_personales' => [
+                        'user' => $item->user,
+                    ]
                 ];  
             }else{
                 foreach($asistencias as $item){
