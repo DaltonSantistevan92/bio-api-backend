@@ -43,13 +43,15 @@ Route::group( ['middleware' => ['auth:sanctum'] ], function (){
 
 
 //RUTAS PUBLICAS
-Route::post('login', [AuthController::class, 'login']);//appMovil
+Route::post('login', [AuthController::class, 'login']);//appMovil  (super admin- trabajador - administrador)
+Route::post('loginWeb', [AuthController::class, 'loginWeb']);//appMovil  (super admin- trabajador - administrador
 Route::post('registro', [AuthController::class, 'registro']);
 
 
 //RUTAS PROTEGIDAS JWT  (Segunda forma)
 Route::middleware('jwt.verify')->group( function () {
 
+    //APPMOVIL
     //ROL
     Route::get('rol/listar', [RolController::class, 'listarRol']);
     
@@ -73,6 +75,16 @@ Route::middleware('jwt.verify')->group( function () {
     Route::post('updateDataUser', [UsuarioController::class, 'updateDataUser']);
 
     Route::post('updatePassword', [UsuarioController::class, 'updatePassword']);
+
+
+    //APPWEB
+    Route::get('user', [UsuarioController::class, 'getUser']);
+
+    //DETELE USER
+    Route::post('deleteUser', [UsuarioController::class, 'deleteUser']);
+
+    //CREATE USER
+    Route::post('createUser', [UsuarioController::class, 'createUser']);
 
     
 }); 

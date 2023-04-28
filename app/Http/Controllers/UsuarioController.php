@@ -6,9 +6,20 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Persona;
 use Illuminate\Support\Facades\{Validator,Hash};
+use PhpParser\Node\Stmt\TryCatch;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UsuarioController extends Controller
 {
+    private $personaCtrl;
+
+
+    public function __construct()
+    {
+
+        $this->personaCtrl = new PersonaController();
+        
+    }
 
     public function updatePassword(Request $request){
         $requestUser = (object) $request->usuario;
@@ -41,6 +52,88 @@ class UsuarioController extends Controller
         }
 
         
+        return response()->json($response);
+    }
+
+
+    public function createUser(Request $request){
+
+        try {
+            $requestPersona = collect($request->persona)->all();
+            $requestUser = collect($request->usuario)->all();
+
+            $validarPersona = $this->personaCtrl->validatePersona($requestPersona);
+            $validarUsuario = $this->validateUser($requestUser);
+
+            if($validarPersona['status'] && $validarUsuario['status']){
+                $responsePersona = $this->personaCtrl->guardarPersona($requestPersona);
+                $persona_id = $responsePersona['persona']->id;
+                $encriptarPassword = Hash::make($requestUser['password']);
+
+                $user = User::create([
+                    'persona_id' => $persona_id,
+                    'rol_id' => 4,
+                    'email' => $requestUser['email'],
+                    'password' => $encriptarPassword,
+                    'imagen' => 'user-default.jpg',
+                ]);
+
+                $token = JWTAuth::fromUser($user);
+
+                $response = ['status' => true, 'message' => "El usuario se registro con exito"]; //'usuario' => ['user' => $user, 'token' => $token ]
+
+            }else{
+
+                $response = [
+                    'status' => false,
+                    'message' => 'No se pudo crear el usuario',
+                    'falla' => [
+                        'error_persona' => $validarPersona['error'] ?? 'No presenta errores',
+                        'error_usuario' => $validarUsuario['error'] ?? 'No presenta errores',
+                    ],
+                ];
+
+            }
+
+            return response()->json($response, 200);
+            
+        } catch (\Throwable $th) {
+            //throw $th;
+            $response = ['status' => false, 'message' => 'Error del Servidor'];
+            return response()->json($response, 500);
+        }
+
+
+
+        
+    }
+
+    public function deleteUser($user_id){
+
+        $dataUser = User::find(intval($user_id));
+        $response = [];
+
+        if($dataUser){
+            $dataUser->estado = "I";
+            if($dataUser->save()){
+                $response = [
+                    'status' => true,
+                    'message' => 'El usuario ha sido eliminado correctamente',                
+                ];
+            }else{
+                $response = [
+                    'status' => false,
+                    'message' => 'Error, No se ha podido dar de baja este usuario.',                
+                ];
+            }        
+        }else{
+            $response = [
+                'status' => false,
+                'message' => 'Error. No hay datos de este usuario',                
+            ];
+
+        }
+
         return response()->json($response);
     }
     
@@ -102,5 +195,23 @@ class UsuarioController extends Controller
             ];
         }
         return response()->json($response);
+    }
+
+    public function getUser(){
+        $usuarios = User::where('estado','A')->get();
+        $response = [];
+
+        if ($usuarios->count() > 0) {
+            foreach($usuarios as $item){
+                $item->persona;
+                $item->rol;
+            }
+
+            $response = [ 'status' => true, 'message' => 'existen datos', 'data' => $usuarios ];
+        } else {
+            $response = [ 'status' => true, 'message' => 'no existen datos', 'data' => null ]; 
+        }
+
+        return response()->json($response,200);
     }
 }
