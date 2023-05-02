@@ -132,7 +132,7 @@ class AuthController extends Controller
 
             if ($user != null) {
                 $rolUser = User::where('rol_id', $user->rol_id)->where('rol_id', 1)->orWhere('rol_id', 2)->first();
-
+                    
                 if ($rolUser) {
                     $hashPassword = Hash::check($requestUser['password'], $user->password);
 

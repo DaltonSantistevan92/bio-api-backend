@@ -53,7 +53,7 @@ Route::middleware('jwt.verify')->group( function () {
 
     //APPMOVIL
     //ROL
-    Route::get('rol/listar', [RolController::class, 'listarRol']);
+    //Route::get('rol/listar', [RolController::class, 'listarRol']);
     
     //ASISTENCIA
     Route::post('asistencia', [AsistenciaController::class, 'registrarAsistencia']);
@@ -81,11 +81,13 @@ Route::middleware('jwt.verify')->group( function () {
     Route::get('user', [UsuarioController::class, 'getUser']);
 
     //DETELE USER
-    Route::post('deleteUser', [UsuarioController::class, 'deleteUser']);
+    Route::get('deleteUser/{id}', [UsuarioController::class, 'deleteUser']);
 
     //CREATE USER
     Route::post('createUser', [UsuarioController::class, 'createUser']);
-
+    
+     //TIPO ROLES
+     Route::get('listarRol', [RolController::class, 'listarRol']);
     
 }); 
 
