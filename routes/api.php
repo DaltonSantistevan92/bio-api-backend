@@ -63,9 +63,10 @@ Route::middleware('jwt.verify')->group( function () {
 
      
     //REPORTE DE ASISTENCIA
-     Route::get('reporte/{user_id}/{f_inicio}/{f_fin}/{tipo_asistencia_id}', [AsistenciaController::class, 'reporte']);
+     Route::get('reporteTrabajador/{user_id}/{f_inicio}/{f_fin}/{tipo_asistencia_id}', [AsistenciaController::class, 'reporteTrabajador']);
+     Route::get('reporteSuperAdmin/{f_inicio}/{f_fin}/{tipo_asistencia_id}', [AsistenciaController::class, 'reporteSuperAdminAndAdministrador']);
 
-    //TIPO ASISTENCIA
+    //TIPO ASISTENCIA 
     Route::get('getTipoAsistencia', [AsistenciaController::class, 'cargarTipoAsistencia']);
 
     //TIPOS

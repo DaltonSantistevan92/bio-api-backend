@@ -19,8 +19,6 @@ class AsistenciaController extends Controller
         $this->geoDepCtrl = new Geolocalizacion_DepartamentoController();
     }
 
-    
-
     public function cargarTipoAsistencia(){
         $response = [];
         $tipo_asistencia = Tipo_Asistencia::all();
@@ -33,33 +31,6 @@ class AsistenciaController extends Controller
 
         return response()->json($response, 200);
     } 
-
-    /* public function buscarUltimoTipo($user_id){
-        $asistenciaUltimo = Asistencia::where('user_id',$user_id)->where('tipo_asistencia_id' ,'=', 1)->where('fecha', date('Y-m-d'))->get();
-
-        if ($asistenciaUltimo->count() > 0) {
-            foreach($asistenciaUltimo as $item){
-                $ultimoTipo = $item->tipo_registro_id;
-            }
-        } else {
-            $ultimoTipo = '';
-        }                               
-        return response()->json($ultimoTipo);  
-    }
-
-    public function buscarUltimoTipoAsistencia($user_id){
-        $asistenciaUltimo = Asistencia::where('user_id',$user_id)->where('tipo_asistencia_id' ,'=', 1)->where('fecha', date('Y-m-d'))->get();
-
-        if ($asistenciaUltimo->count() > 0) {
-            foreach($asistenciaUltimo as $item){
-                $ultimoTipoAsistencia = $item->tipo_asistencia_id;
-            }
-        } else {
-            $ultimoTipoAsistencia = '';
-        }                               
-        return response()->json($ultimoTipoAsistencia);  
-    } */
-
 
     public function buscarUltimoTipo($user_id){
         $asistenciaUltimo = Asistencia::where('user_id',$user_id)->where('fecha', date('Y-m-d'))->get();
@@ -120,8 +91,6 @@ class AsistenciaController extends Controller
         }
         return response()->json($response);  
     }
-
-    
 
     public function registrarAsistencia(Request $request){
         $requestAsistencia = (object) $request->asistencia;
@@ -240,7 +209,6 @@ class AsistenciaController extends Controller
         return response()->json($response);
     }
 
-
     private function saveAsistencia($requestAsistencia){
         $newAsistencia = new Asistencia();
         $newAsistencia->user_id = $requestAsistencia->user_id;
@@ -253,7 +221,7 @@ class AsistenciaController extends Controller
     }
 
 
-    public function reporte($user_id, $f_inicio, $f_fin, $tipo_asistencia_id){//solo trabajador
+    public function reporteTrabajador($user_id, $f_inicio, $f_fin, $tipo_asistencia_id){//solo trabajador
         $response = [];
 
         $asistencias = Asistencia::where('estado','A')->where('user_id',intval($user_id))
@@ -310,4 +278,67 @@ class AsistenciaController extends Controller
         }  
         return response()->json($response);
     }
+
+
+    public function reporteSuperAdminAndAdministrador($f_inicio, $f_fin, $tipo_asistencia_id){
+        $returnResponse = [];
+
+        $asistencias = Asistencia::where('estado','A')
+                            ->where('fecha', '>=', $f_inicio)->where('fecha', '<=', $f_fin)
+                            ->where('tipo_asistencia_id', intval($tipo_asistencia_id))->get();
+
+        $returnResponse = $this->consultarTipoAsistencias($asistencias, intval($tipo_asistencia_id));
+
+        return response()->json($returnResponse); 
+    }
+
+
+    private function consultarTipoAsistencias($asistencias, $tipo_asistencia_id){
+        if ( count($asistencias) > 0 ) {
+    
+            if ( intval($tipo_asistencia_id) == 1 ) {
+                foreach($asistencias as $item){
+                    $item->user->persona;
+                    $item->tipo_asistencia;
+                    $item->tipo_registro;
+
+                    foreach($item->ubicacion as $ubi){
+                        $ubi;
+                    }
+    
+                    foreach( $item->asistencias_departamento as $ad){
+                        $ad->departamento;
+                    }
+                }
+                $response = [
+                    'status' => true,
+                    'message' => 'existen datos de asistencias',
+                    'data' => $asistencias,
+                ];  
+            }else{
+                foreach($asistencias as $item){
+                    $item->user->persona;
+                    $item->tipo_asistencia;
+                    $item->tipo_registro;
+    
+                    foreach($item->asistencia_evento as $asev){
+                        $asev->evento;
+                    }
+                }
+    
+                $response = [
+                    'status' => true,
+                    'message' => 'existen datos de evento',
+                    'data' => $asistencias
+                ]; 
+            }
+        }else{
+            $response = [
+                'status' => false,
+                'message' => 'no existen datos',
+                'data' => null
+            ];
+        } 
+        return $response;
+    } 
 }
