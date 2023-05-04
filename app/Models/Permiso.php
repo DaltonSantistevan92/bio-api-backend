@@ -12,7 +12,7 @@ class Permiso extends Model
     use HasFactory;
 
     protected $table = 'permisos';
-    protected $fillable = ['menu_id','rol_id','acceso','estado'];
+    protected $fillable = ['menu_id','rol_id','acceso','guard','estado'];
     public $timestamps = false;
 
     public function menu(){

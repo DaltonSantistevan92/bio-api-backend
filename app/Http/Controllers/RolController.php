@@ -9,7 +9,8 @@ class RolController extends Controller
 {
     public function listarRol(){
         $response = [];
-        $roles = Rol::all();
+        $superAdministrador = 1;
+        $roles = Rol::where('estado','A')->where('id','<>',$superAdministrador)->get();
 
         if ($roles->count() > 0) {
             $response = [ 'status' => true, 'message' => 'existen roles', 'data' => $roles ];
@@ -19,5 +20,5 @@ class RolController extends Controller
         return response()->json($response, 200);
     }
 
-
+   
 }

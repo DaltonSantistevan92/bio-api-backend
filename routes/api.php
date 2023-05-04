@@ -43,15 +43,17 @@ Route::group( ['middleware' => ['auth:sanctum'] ], function (){
 
 
 //RUTAS PUBLICAS
-Route::post('login', [AuthController::class, 'login']);//appMovil
+Route::post('login', [AuthController::class, 'login']);//appMovil  (super admin- trabajador - administrador)
+Route::post('loginWeb', [AuthController::class, 'loginWeb']);//appMovil  (super admin- trabajador - administrador
 Route::post('registro', [AuthController::class, 'registro']);
 
 
 //RUTAS PROTEGIDAS JWT  (Segunda forma)
 Route::middleware('jwt.verify')->group( function () {
 
+    //APPMOVIL
     //ROL
-    Route::get('rol/listar', [RolController::class, 'listarRol']);
+    //Route::get('rol/listar', [RolController::class, 'listarRol']);
     
     //ASISTENCIA
     Route::post('asistencia', [AsistenciaController::class, 'registrarAsistencia']);
@@ -61,9 +63,10 @@ Route::middleware('jwt.verify')->group( function () {
 
      
     //REPORTE DE ASISTENCIA
-     Route::get('reporte/{user_id}/{f_inicio}/{f_fin}/{tipo_asistencia_id}', [AsistenciaController::class, 'reporte']);
+     Route::get('reporteTrabajador/{user_id}/{f_inicio}/{f_fin}/{tipo_asistencia_id}', [AsistenciaController::class, 'reporteTrabajador']);
+     Route::get('reporteSuperAdmin/{f_inicio}/{f_fin}/{tipo_asistencia_id}', [AsistenciaController::class, 'reporteSuperAdminAndAdministrador']);
 
-    //TIPO ASISTENCIA
+    //TIPO ASISTENCIA 
     Route::get('getTipoAsistencia', [AsistenciaController::class, 'cargarTipoAsistencia']);
 
     //TIPOS
@@ -74,6 +77,18 @@ Route::middleware('jwt.verify')->group( function () {
 
     Route::post('updatePassword', [UsuarioController::class, 'updatePassword']);
 
+
+    //APPWEB
+    Route::get('user', [UsuarioController::class, 'getUser']);
+
+    //DETELE USER
+    Route::get('deleteUser/{id}', [UsuarioController::class, 'deleteUser']);
+
+    //CREATE USER
+    Route::post('createUser', [UsuarioController::class, 'createUser']);
+    
+     //TIPO ROLES
+     Route::get('listarRol', [RolController::class, 'listarRol']);
     
 }); 
 
