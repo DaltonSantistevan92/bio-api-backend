@@ -2,12 +2,14 @@
 
 use App\Http\Controllers\AsistenciaController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EventoController;
 use App\Http\Controllers\Geolocalizacion_DepartamentoController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\Tipo_RegistroController;
 use App\Http\Controllers\ToolController;
+use App\Http\Controllers\DepartamentoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -89,6 +91,19 @@ Route::middleware('jwt.verify')->group( function () {
     
      //TIPO ROLES
      Route::get('listarRol', [RolController::class, 'listarRol']);
+
+     //EVENTO
+     Route::get('event/list', [EventoController::class, 'listarEvento']);
+     Route::post('event/save', [EventoController::class, 'guardarEvento']);
+     Route::get('event/delete/{id}', [EventoController::class, 'eliminarEvento']);
+     Route::post('event/update', [EventoController::class, 'editarEvento']);
+    
+     //DEPARTAMENTO
+     Route::get('departament/list', [DepartamentoController::class, 'getAllDepartamentos']);
+     Route::post('departament/save', [DepartamentoController::class, 'createDepartamento']);
+     Route::get('departament/delete/{id}', [DepartamentoController::class, 'deleteDepartamento']);
+     Route::post('departament/update', [DepartamentoController::class, 'updateDepartamento']);
+
     
 }); 
 

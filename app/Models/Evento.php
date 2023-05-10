@@ -13,6 +13,7 @@ class Evento extends Model
 
     protected $table = 'eventos';
     protected $fillable = ['nombre','fecha','estado'];
+    public $timestamps = false;
 
     public function asistencia_evento(){
         return $this->hasMany(Asistencia_Eventos::class);
