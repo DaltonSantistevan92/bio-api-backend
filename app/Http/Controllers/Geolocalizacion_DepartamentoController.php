@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 class Geolocalizacion_DepartamentoController extends Controller
 {
 
+
+
     private function buscarUbicacion($latitud,$longitud)
     {
         $ubicacion = Geolocalizacion_Departamento::select()

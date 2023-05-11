@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Departamento;
-
+use App\Models\Geolocalizacion_Departamento;
 use Illuminate\Http\Request;
 
 class DepartamentoController extends Controller
@@ -11,11 +11,15 @@ class DepartamentoController extends Controller
     //
   
     public function getAllDepartamentos(){
-
         $response = [];
         $departamentos = Departamento::all();
 
         if($departamentos->count() > 0){
+
+            foreach($departamentos as $item){
+                $item->geolocalizacion_departamento;
+            }
+
             $response = [
                 'status' => true, 
                 'message' => 'Departamentos cargadas con éxito.', 
@@ -33,11 +37,15 @@ class DepartamentoController extends Controller
         $response = [];
 
         if($requestDepartamento){
+
+            //CREAR DEPARTAMENTO
             $newDepartamento = new Departamento();
             $newDepartamento->nombre = $requestDepartamento->nombre;
             $newDepartamento->estado = "A";
 
             if($newDepartamento->save()){
+
+                //CREAR LA GEOLOCALIZACION DEL DEPART
                 $response = [
                     'status' => true,
                     'message' => 'El departamento ' .$newDepartamento->nombre. 'se ha registrado con éxito.'                    
@@ -57,13 +65,26 @@ class DepartamentoController extends Controller
 
     public function updateDepartamento(Request $request){
         $requestDepartamento = (object) $request->departamento;
+        $requestGeolocalizacion_Departamento = (object) $request->geolocalizacion_departamento;
         $response = [];
 
         $dataDepartamento = Departamento::find($requestDepartamento->id);
 
         if($dataDepartamento){
+
+            //Editar Dertamento
             $dataDepartamento->nombre = $requestDepartamento->nombre;
-            $dataDepartamento->estado = $requestDepartamento->estado;
+            $dataDepartamento->estado = 'A';
+
+            //Editar Geolocalizacion Departamento
+            foreach($requestGeolocalizacion_Departamento as $item){
+                $newGeolocalizacion_Departamento = new Geolocalizacion_Departamento;
+                $newGeolocalizacion_Departamento->id = $requestDepartamento->departamento_id;
+                $newGeolocalizacion_Departamento->lat = $item->lat;
+                $newGeolocalizacion_Departamento->log = $item->log;
+                $newGeolocalizacion_Departamento->save();
+            }
+
 
             if($dataDepartamento->save()){
                 $response = [
