@@ -2,33 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Evento;
+use Illuminate\Http\Request;
 
 class EventoController extends Controller
 {
 
-    public function buscarEventos($fecha){
+    public function buscarEventos($fecha)
+    {
         $response = [];
-        $event = Evento::whereDate('fecha',$fecha)->get()->first();
+        $event = Evento::whereDate('fecha', $fecha)->get()->first();
 
         if ($event) {
             $response = [
                 'status' => true,
                 'evento_id' => $event->id,
-                'message' => 'existe evento'
-            ];   
-        }else {
+                'message' => 'existe evento',
+            ];
+        } else {
             $response = [
                 'status' => false,
-                'message' => 'No hay eventos disponibles'
+                'message' => 'No hay eventos disponibles',
             ];
         }
         return $response;
     }
 
-
-    public function listarEvento(){
+    public function listarEvento()
+    {
         $response = [];
         $event = Evento::all();
 
@@ -36,51 +37,21 @@ class EventoController extends Controller
             $response = [
                 'status' => true,
                 'message' => 'existe evento',
-                'data' => $event
-            ]; 
-        }else {
+                'data' => $event,
+            ];
+        } else {
             $response = [
                 'status' => false,
                 'message' => 'No hay eventos',
-                'data' => null
+                'data' => null,
             ];
         }
         return response()->json($response);
     }
 
 
-    public function editarEvento(Request $request){
-        $dataEvento = (object) $request->evento;
-        $event = Evento::find(intval($dataEvento->id));
-        $response = [];
-
-        if ($event) {
-            $event->nombre = $dataEvento->nombre;
-            $event->fecha = $dataEvento->fecha;
-            $event->estado = 'A';
-
-            if ($event->save()) {
-                $response = [
-                    'status' => true,
-                    'message' => 'Se actualizo el evento '. $event->nombre
-                ]; 
-            } else {
-                $response = [
-                    'status' => false,
-                    'message' => 'No se puede actualizar el evento'
-                ]; 
-            }
-        }else {
-            $response = [
-                'status' => false,
-                'message' => 'No hay datos para procesar'
-            ];
-        }
-        return response()->json($response);
-    }
-
-
-    public function eliminarEvento($id){
+    public function eliminarEvento($id)
+    {
         $event = Evento::find($id);
         $response = [];
 
@@ -90,24 +61,25 @@ class EventoController extends Controller
             if ($event->save()) {
                 $response = [
                     'status' => true,
-                    'message' => 'Se elimino el evento '. $event->nombre
-                ]; 
+                    'message' => 'Se elimino el evento ' . $event->nombre,
+                ];
             } else {
                 $response = [
                     'status' => false,
-                    'message' => 'No se puede elimino el evento'
-                ]; 
+                    'message' => 'No se puede elimino el evento',
+                ];
             }
-        }else {
+        } else {
             $response = [
                 'status' => false,
-                'message' => 'No hay datos para procesar'
+                'message' => 'No hay datos para procesar',
             ];
         }
         return response()->json($response);
     }
 
-    public function guardarEvento(Request $request){
+    public function guardarEvento(Request $request)
+    {
         $dataEvento = (object) $request->evento;
         $response = [];
 
@@ -120,18 +92,64 @@ class EventoController extends Controller
             if ($newEvent->save()) {
                 $response = [
                     'status' => true,
-                    'message' => 'Se registro el evento '. $newEvent->nombre
-                ]; 
+                    'message' => 'Se registro el evento ' . $newEvent->nombre,
+                ];
             } else {
                 $response = [
                     'status' => false,
-                    'message' => 'No se puede registro el evento'
-                ]; 
+                    'message' => 'No se puede registro el evento',
+                ];
             }
         } else {
             $response = [
                 'status' => false,
-                'message' => 'No hay datos para procesar'
+                'message' => 'No hay datos para procesar',
+            ];
+        }
+        return response()->json($response);
+    }
+
+    public function editarEvento(Request $request)
+    {
+        $dataEvento = (object) $request->evento;
+        $event = Evento::find(intval($dataEvento->id));
+        $response = [];
+
+        if ($event) {
+            $event->nombre = $dataEvento->nombre;
+            $event->fecha = $dataEvento->fecha;
+            $event->estado = 'A';
+
+            $existeNombre = Evento::where('nombre', $dataEvento->nombre)->get()->first();
+            $existeFecha = Evento::where('fecha', $dataEvento->fecha)->get()->first();
+
+            if ($existeNombre) {
+                $response = [
+                    'status' => false,
+                    'message' => 'Existe el nombre del evento: ' . $existeNombre->nombre . ' vuelva a modificar',
+                ];
+            } else if ($existeFecha) {
+                $response = [
+                    'status' => false,
+                    'message' => 'Existe la fecha del evento ' . $existeFecha->fecha . ' vuelva a modificar',
+                ];
+            } else {
+                if ($event->save()) {
+                    $response = [
+                        'status' => true,
+                        'message' => 'Se actualizo el evento ' . $event->nombre,
+                    ];
+                } else {
+                    $response = [
+                        'status' => false,
+                        'message' => 'No se puede actualizar el evento',
+                    ];
+                }
+            }
+        } else {
+            $response = [
+                'status' => false,
+                'message' => 'No hay datos para procesar',
             ];
         }
         return response()->json($response);

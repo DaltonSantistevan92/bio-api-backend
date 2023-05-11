@@ -97,7 +97,7 @@ Route::middleware('jwt.verify')->group( function () {
      Route::post('event/save', [EventoController::class, 'guardarEvento']);
      Route::get('event/delete/{id}', [EventoController::class, 'eliminarEvento']);
      Route::post('event/update', [EventoController::class, 'editarEvento']);
-    
+    ///prueba
      //DEPARTAMENTO
      Route::get('departament/list', [DepartamentoController::class, 'getAllDepartamentos']);
      Route::post('departament/save', [DepartamentoController::class, 'createDepartamento']);
