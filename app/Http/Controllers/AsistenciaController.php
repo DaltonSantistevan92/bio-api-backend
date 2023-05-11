@@ -246,7 +246,7 @@ class AsistenciaController extends Controller
                 }
                 $response = [
                     'status' => true,
-                    'message' => 'existen datos de asistencias',
+                    'message' => 'Existen registros de '. $item->tipo_asistencia->type,
                     'data' => $asistencias,
                     'datos_personales' => [
                         'user' => $item->user,
@@ -265,14 +265,17 @@ class AsistenciaController extends Controller
     
                 $response = [
                     'status' => true,
-                    'message' => 'existen datos de evento',
-                    'data' => $asistencias
+                    'message' => 'Existen registro de '. $item->tipo_asistencia->type,
+                    'data' => $asistencias,
+                    'datos_personales' => [
+                        'user' => $item->user,
+                    ]
                 ]; 
             }
         }else{
             $response = [
                 'status' => false,
-                'message' => 'no existen datos',
+                'message' => 'No existen registro',
                 'data' => null
             ];
         }  
@@ -312,7 +315,7 @@ class AsistenciaController extends Controller
                 }
                 $response = [
                     'status' => true,
-                    'message' => 'existen datos de asistencias',
+                    'message' => 'Existen registro de '. $item->tipo_asistencia->type,
                     'data' => $asistencias,
                 ];  
             }else{
@@ -328,14 +331,14 @@ class AsistenciaController extends Controller
     
                 $response = [
                     'status' => true,
-                    'message' => 'existen datos de evento',
+                    'message' => 'Existen registro de'. $item->tipo_asistencia->type,
                     'data' => $asistencias
                 ]; 
             }
         }else{
             $response = [
                 'status' => false,
-                'message' => 'no existen datos',
+                'message' => 'No existen datos',
                 'data' => null
             ];
         } 
