@@ -78,7 +78,7 @@ class EventoController extends Controller
         return response()->json($response);
     }
 
-    public function guardarEvento(Request $request)
+    public function guardarEvento2(Request $request)
     {
         $dataEvento = (object) $request->evento;
         $response = [];
@@ -108,7 +108,49 @@ class EventoController extends Controller
         }
         return response()->json($response);
     }
+    public function guardarEvento(Request $request)
+    {
+        $dataEvento = (object) $request->evento;
+        $response = [];
 
+        if ($dataEvento) {
+            $newEvent = new Evento();
+            $newEvent->nombre = $dataEvento->nombre;
+            $newEvent->fecha = $dataEvento->fecha;
+            $newEvent->estado = 'A';
+            $existeNombre = Evento::where('nombre', $dataEvento->nombre)->get()->first();
+            $existeFecha = Evento::where('fecha', $dataEvento->fecha)->get()->first();
+            if ($existeNombre) {
+                $response = [
+                    'status' => false,
+                    'message' => 'Existe el nombre del evento: ' . $existeNombre->nombre . ' vuelva a intentar',
+                ];
+            } else if ($existeFecha) {
+                $response = [
+                    'status' => false,
+                    'message' => 'Existe la fecha del evento ' . $existeFecha->fecha . ' vuelva a intentar',
+                ];
+            }else {
+                if ($newEvent->save()) {
+                    $response = [
+                        'status' => true,
+                        'message' => 'Se registro el evento ' . $newEvent->nombre,
+                    ];
+                } else {
+                    $response = [
+                        'status' => false,
+                        'message' => 'No se puede registro el evento',
+                    ];
+            }
+            }
+        } else {
+            $response = [
+                'status' => false,
+                'message' => 'No hay datos para procesar',
+            ];
+        }
+        return response()->json($response);
+    }
     public function editarEvento(Request $request)
     {
         $dataEvento = (object) $request->evento;

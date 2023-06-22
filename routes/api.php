@@ -81,12 +81,11 @@ Route::middleware('jwt.verify')->group( function () {
 
 
     //APPWEB
+    
+    //USER
     Route::get('user', [UsuarioController::class, 'getUser']);
-
-    //DETELE USER
+    Route::post('updatePerfilUser', [UsuarioController::class, 'updatePerfil']);
     Route::get('deleteUser/{id}', [UsuarioController::class, 'deleteUser']);
-
-    //CREATE USER
     Route::post('createUser', [UsuarioController::class, 'createUser']);
     
      //TIPO ROLES
@@ -97,12 +96,25 @@ Route::middleware('jwt.verify')->group( function () {
      Route::post('event/save', [EventoController::class, 'guardarEvento']);
      Route::get('event/delete/{id}', [EventoController::class, 'eliminarEvento']);
      Route::post('event/update', [EventoController::class, 'editarEvento']);
-    ///prueba
+    
+    
      //DEPARTAMENTO
      Route::get('departament/list', [DepartamentoController::class, 'getAllDepartamentos']);
      Route::post('departament/save', [DepartamentoController::class, 'createDepartamento']);
      Route::get('departament/delete/{id}', [DepartamentoController::class, 'deleteDepartamento']);
      Route::post('departament/update', [DepartamentoController::class, 'updateDepartamento']);
+
+     //count User - Departaments - Events 
+
+     Route::get('count/list', [UsuarioController::class, 'getAllCount']);
+
+     //TENDENCIA DE ASISTENCIA GLOBALES
+     Route::get('tendenciaAsistenciaGlobales', [AsistenciaController::class, 'tendeciasAsistenciasGlobal']);
+     Route::get('regresionLinealAsistencias/{temporalidad_id}/{tipo_asistencia_id}/{fechaInicio}/{fechaFin}', [AsistenciaController::class, 'regresionLinealAsistencias']);
+
+
+
+
 
     
 }); 

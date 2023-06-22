@@ -34,6 +34,9 @@ class DepartamentoController extends Controller
     public function createDepartamento(Request $request){
 
         $requestDepartamento = (object) $request->departamento;
+        $requestGeolocalizacion_Departamento = (array) $request->geolocalizacion_departamento;
+
+        //var_dump($requestGeolocalizacion_Departamento); die();
         $response = [];
 
         if($requestDepartamento){
@@ -45,11 +48,20 @@ class DepartamentoController extends Controller
 
             if($newDepartamento->save()){
 
-                //CREAR LA GEOLOCALIZACION DEL DEPART
+                //CREAR LA GEOLOCALIZACION DEL DEPARTAMENTO
+                foreach($requestGeolocalizacion_Departamento as $item){
+                    $newGeolocalizacion_Departamento = new Geolocalizacion_Departamento;
+                    $newGeolocalizacion_Departamento->departamento_id = $newDepartamento->id;
+                    $newGeolocalizacion_Departamento->lat = $item['lat'];
+                    $newGeolocalizacion_Departamento->log = $item['log'];
+                    $newGeolocalizacion_Departamento->save();
+                }
+
                 $response = [
                     'status' => true,
-                    'message' => 'El departamento ' .$newDepartamento->nombre. 'se ha registrado con éxito.'                    
+                    'message' => 'El departamento ' .$newDepartamento->nombre. ' se ha registrado con éxito.'                    
                 ];
+
             }else{
                 $response = [
                     'status' => false, 
@@ -65,37 +77,48 @@ class DepartamentoController extends Controller
 
     public function updateDepartamento(Request $request){
         $requestDepartamento = (object) $request->departamento;
-        $requestGeolocalizacion_Departamento = (object) $request->geolocalizacion_departamento;
+        $requestGeolocalizacion_Departamento = (array) $request->geolocalizacion_departamento;
         $response = [];
 
         $dataDepartamento = Departamento::find($requestDepartamento->id);
 
         if($dataDepartamento){
-
             //Editar Dertamento
             $dataDepartamento->nombre = $requestDepartamento->nombre;
             $dataDepartamento->estado = 'A';
 
-            //Editar Geolocalizacion Departamento
-            foreach($requestGeolocalizacion_Departamento as $item){
-                $newGeolocalizacion_Departamento = new Geolocalizacion_Departamento;
-                $newGeolocalizacion_Departamento->id = $requestDepartamento->departamento_id;
-                $newGeolocalizacion_Departamento->lat = $item->lat;
-                $newGeolocalizacion_Departamento->log = $item->log;
-                $newGeolocalizacion_Departamento->save();
-            }
+            $dataGeolocalizacionDepartamento = Geolocalizacion_Departamento::where('departamento_id',$dataDepartamento->id)->get();
+            
+            if ($dataGeolocalizacionDepartamento) {
+                foreach($dataGeolocalizacionDepartamento as $item){
+                    $item->delete();
+                }
 
+                
+                foreach($requestGeolocalizacion_Departamento as $item){
+                    $newGeolocalizacion_Departamento = new Geolocalizacion_Departamento;
+                    $newGeolocalizacion_Departamento->departamento_id = $requestDepartamento->id;
+                    $newGeolocalizacion_Departamento->lat = $item['lat'];
+                    $newGeolocalizacion_Departamento->log = $item['log'];
+                    $newGeolocalizacion_Departamento->save();
+                }
 
-            if($dataDepartamento->save()){
-                $response = [
-                    'status' => true,
-                    'message' => 'El departamento ' .$dataDepartamento->nombre. 'se ha actualizado con éxito.'                    
-                ];
-
-            }else{
+                if($dataDepartamento->save()){
+                    $response = [
+                        'status' => true,
+                        'message' => 'El departamento ' .$dataDepartamento->nombre. ' se ha actualizado con éxito.'                    
+                    ];
+    
+                }else{
+                    $response = [
+                        'status' => false,
+                        'message' => 'Error. No se puede actualizar este departamento.'                    
+                    ];
+                }
+            } else {
                 $response = [
                     'status' => false,
-                    'message' => 'Error. No se puede actualizar este departamento.'                    
+                    'message' => 'Error. No exite el departamento en la geolocalización.'                    
                 ];
             }
         }else{
@@ -117,7 +140,7 @@ class DepartamentoController extends Controller
             if($dataDepartamento->save()){
                 $response = [
                     'status' => true,
-                    'message' => 'El departamento ha sido eliminado correctamente.',
+                    'message' => 'El departamento esta inactivo',
                 ];
             }else{
                 $response = [

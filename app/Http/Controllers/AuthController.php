@@ -26,7 +26,7 @@ class AuthController extends Controller
     { //app movil
         try {
             $requestPersona = collect($request->persona)->all();
-            $requestUser = collect($request->usuario)->all();
+            $requestUser = collect($request->usuario)->all();   
 
             $validarPersona = $this->personaCtrl->validatePersona($requestPersona);
             $validarUsuario = $this->validateUser($requestUser);

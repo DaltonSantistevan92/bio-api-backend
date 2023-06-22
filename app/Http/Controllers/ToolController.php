@@ -12,13 +12,14 @@ class ToolController extends Controller
     //
 
     public function mostrarImagen($carpeta,$archivo){
-        try {
+       /*  try { */
             $existeArchivo = Storage::disk($carpeta)->exists($archivo);
             $response = [];
 
             if($existeArchivo){
                 $file = Storage::disk($carpeta)->get($archivo);
-                return new Response($file,200);
+                //return new Response($file,200);
+                return response()->json($file,200);
             }else{
                 $response=[
                     'status' => false,
@@ -27,10 +28,10 @@ class ToolController extends Controller
                 ];
             }
             return response()->json($response);
-        } catch (\Throwable $th) {
+        /* } catch (\Throwable $th) {
             $response = [ 'status' => false, 'message' => 'Error del Servidor' ];
             return response()->json( $response, 500 );
-        }
+        } */
     }
 
     public function subirArchivo(Request $request){

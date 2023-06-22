@@ -2,17 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Departamento;
+use App\Models\Evento;
 use App\Models\Persona;
 use App\Models\User;
+use App\Models\Rol;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Hash};
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 
 class UsuarioController extends Controller
 {
+    private $permisoCtrl;
     
     public function __construct()
     {
+        $this->permisoCtrl = new PermisoController();
+
+
 
     }
 
@@ -119,7 +128,7 @@ class UsuarioController extends Controller
             if ($dataUser->save()) {
                 $response = [
                     'status' => true,
-                    'message' => 'El usuario ha sido eliminado correctamente',
+                    'message' => 'El usuario se encuentra inactivo',
                 ];
             } else {
                 $response = [
@@ -192,7 +201,8 @@ class UsuarioController extends Controller
 
     public function getUser()
     {
-        $usuarios = User::where('estado', 'A')->where('id','<>',3)->get();
+        //$usuarios = User::where('estado', 'A')->where('id','<>',3)->get();
+        $usuarios = User::all();
         $response = [];
 
         if ($usuarios->count() > 0) {
@@ -207,5 +217,88 @@ class UsuarioController extends Controller
         }
 
         return response()->json($response, 200);
+    }
+
+    public function updatePerfil(Request $request)
+    {
+        $requestUser = (object) $request->usuario;
+        $requestPerson = (object) $request->persona;
+        $response = [];
+
+        //Search Id user
+        $dataUser = User::find($requestUser->user_id);
+
+        if ($requestUser) {
+            if ($dataUser) {
+                $dataUser->name = $requestUser->name;
+                $dataUser->email = $requestUser->email;
+                $dataUser->imagen = $requestUser->imagen;
+
+                //Update Data Person
+                $dataPerson = Persona::find($requestPerson->persona_id);
+                $dataPerson->nombres = $requestPerson->nombres;
+                $dataPerson->apellidos = $requestPerson->apellidos;
+                $dataPerson->num_celular = $requestPerson->num_celular;
+                $dataPerson->direccion = $requestPerson->direccion;
+                $dataPerson->save();
+                $dataUser->save();
+
+                $dataUser->persona;
+                $dataUser->rol;
+
+                $menu = $this->permisoCtrl->permisosAppWeb($dataUser->rol->id);
+                $payloadable = ['user' => $dataUser, 'menu' => $menu];
+
+                /* $response = [
+                    'status' => true,
+                    'message' => 'El usuario se ha actualizado correctamente',
+                    'data' => $dataUser,
+                ]; */
+
+                $token = JWTAuth::claims($payloadable)->fromSubject($dataUser); //user
+
+                $response = [
+                    'status' => true,
+                    'message' => "El usuario se ha actualizado correctamente",
+                    'token' => $token,
+                ];
+            } else {
+                $response = [
+                    'status' => false,
+                    'message' => 'Error. No se puede actualizar tu información.',
+                ];
+            }
+        } else {
+            $response = [
+                'status' => false,
+                'message' => 'Error. No hay datos para procesar '
+            ];
+        }
+        return response()->json($response);
+    }
+
+    public function getAllCount(){
+        $response = [];
+        $array_resultante = [];
+
+        $dataUser = User::all();
+        $dataEvent = Evento::all();
+        $dataDepartamento = Departamento::all();
+        $dataRol = Rol::all();
+        
+
+        $user = [[ 'nombre' => 'usuario', 'icono' => 'bi bi-people-fill', 'cantidad' => $dataUser->count() ]];
+
+        $evento = [[ 'nombre' => 'evento', 'icono' => 'bi bi-calendar-check', 'cantidad' => $dataEvent->count() ]];
+
+        $departamento = [[ 'nombre' => 'departamento', 'icono' => 'bi bi-buildings-fill', 'cantidad' => $dataDepartamento->count() ]];
+
+        $rol = [[ 'nombre' => 'rol', 'icono' => 'bi bi-people-fill', 'cantidad' => $dataRol->count() ]];
+
+        $array_resultante = array_merge($user, $evento, $departamento, $rol);
+
+        $response = [ 'data' => $array_resultante ];
+        return response()->json($response);
+
     }
 }
