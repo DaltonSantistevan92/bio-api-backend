@@ -10,6 +10,7 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\Tipo_RegistroController;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\DepartamentoController;
+use App\Http\Controllers\SexoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -48,14 +49,16 @@ Route::group( ['middleware' => ['auth:sanctum'] ], function (){
 Route::post('login', [AuthController::class, 'login']);//appMovil  (super admin- trabajador - administrador)
 Route::post('loginWeb', [AuthController::class, 'loginWeb']);//appMovil  (super admin- trabajador - administrador
 Route::post('registro', [AuthController::class, 'registro']);
+Route::get('sexo/listar', [SexoController::class, 'listarSexo']);
 
 
 //RUTAS PROTEGIDAS JWT  (Segunda forma)
 Route::middleware('jwt.verify')->group( function () {
 
     //APPMOVIL
-    //ROL
-    //Route::get('rol/listar', [RolController::class, 'listarRol']);
+
+    //SEXO
+    Route::get('sexo', [SexoController::class, 'listarSexo']);
     
     //ASISTENCIA
     Route::post('asistencia', [AsistenciaController::class, 'registrarAsistencia']);
@@ -67,6 +70,8 @@ Route::middleware('jwt.verify')->group( function () {
     //REPORTE DE ASISTENCIA
      Route::get('reporteTrabajador/{user_id}/{f_inicio}/{f_fin}/{tipo_asistencia_id}', [AsistenciaController::class, 'reporteTrabajador']);
      Route::get('reporteSuperAdmin/{f_inicio}/{f_fin}/{tipo_asistencia_id}', [AsistenciaController::class, 'reporteSuperAdminAndAdministrador']);
+
+     Route::get('asistenciaXdepartamento/{f_inicio}/{f_fin}/{usuario_id}', [AsistenciaController::class, 'asistenciaXdepartamento']);
 
     //TIPO ASISTENCIA 
     Route::get('getTipoAsistencia', [AsistenciaController::class, 'cargarTipoAsistencia']);
@@ -87,6 +92,11 @@ Route::middleware('jwt.verify')->group( function () {
     Route::post('updatePerfilUser', [UsuarioController::class, 'updatePerfil']);
     Route::get('deleteUser/{id}', [UsuarioController::class, 'deleteUser']);
     Route::post('createUser', [UsuarioController::class, 'createUser']);
+    Route::post('asignUserDepartament', [UsuarioController::class, 'asignarDepartamentoUsuario']);
+    Route::get('usersDepart', [UsuarioController::class, 'usersDepart']);
+
+    //Rerportes
+    Route::get('listUsuariosXdepartamentos/{departamento_id}', [UsuarioController::class, 'usuariosXdepartamentos']);
     
      //TIPO ROLES
      Route::get('listarRol', [RolController::class, 'listarRol']);
@@ -100,10 +110,11 @@ Route::middleware('jwt.verify')->group( function () {
     
      //DEPARTAMENTO
      Route::get('departament/list', [DepartamentoController::class, 'getAllDepartamentos']);
+     Route::get('departament/activeList', [DepartamentoController::class, 'getAllDepartamentosActivos']);
      Route::post('departament/save', [DepartamentoController::class, 'createDepartamento']);
      Route::get('departament/delete/{id}', [DepartamentoController::class, 'deleteDepartamento']);
      Route::post('departament/update', [DepartamentoController::class, 'updateDepartamento']);
-
+     Route::get('departament/listNotAssigned', [DepartamentoController::class, 'getAllUsuariosSinDepartamentos']);
      //count User - Departaments - Events 
 
      Route::get('count/list', [UsuarioController::class, 'getAllCount']);
@@ -111,6 +122,12 @@ Route::middleware('jwt.verify')->group( function () {
      //TENDENCIA DE ASISTENCIA GLOBALES
      Route::get('tendenciaAsistenciaGlobales', [AsistenciaController::class, 'tendeciasAsistenciasGlobal']);
      Route::get('regresionLinealAsistencias/{temporalidad_id}/{tipo_asistencia_id}/{fechaInicio}/{fechaFin}', [AsistenciaController::class, 'regresionLinealAsistencias']);
+
+    //Reportes
+    Route::get('horasTrabajadas/{user_id}/{fecha_inicio}/{fecha_fin}', [AsistenciaController::class, 'horasTrabajadas']);
+
+    //KPI
+    Route::get('horasExtrasAgrupadosXDepartamentoKpi/{fecha_inicio}/{fecha_fin}', [AsistenciaController::class, 'horasExtrasAgrupadosXDepartamentoKpi']);
 
 
 

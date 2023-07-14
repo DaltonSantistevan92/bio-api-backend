@@ -25,6 +25,79 @@ class UsuarioController extends Controller
 
     }
 
+    public function usersDepart(){
+        $response = [];
+        $userData = User::all();
+
+        foreach($userData as $item){
+            $item->departamento;
+
+        }
+
+        $response = [
+            'status' => true,
+            'message' => 'Datos recurados con éxito.',
+            'data' => $userData
+        ];
+
+        return response()->json($response, 200);
+    }
+
+    public function usuariosXdepartamentos($departamento_id){
+        $response = [];
+        $dataUser = User::where('departamento_id', $departamento_id)->get();
+
+        if($dataUser){
+
+            foreach($dataUser as $item){
+                $item->persona->sexo;
+                $item->rol;
+            }
+
+            $response = [
+                'status' => true,
+                'message' => 'Datos recuperados con éxito.',
+                'data' => $dataUser
+            ];
+
+        }else{
+            $response = [
+                'status' => false,
+                'message' => 'Error. No hay datos para procesar.',
+            ];
+        }
+
+        return response()->json($response, 200);
+
+    }
+
+    public function asignarDepartamentoUsuario(Request $request){
+        $response = [];
+        $requestListAsign = (array) $request->lista;
+
+        if(count($requestListAsign) > 0){
+            foreach($requestListAsign as $item){
+                $dataUser = User::find(intval($item['usuario_id']));
+                if($dataUser){
+                    $dataUser->departamento_id = $item['departamento_id'];
+                    $dataUser->save();
+                }
+            }
+            $response = [
+                'status' => true,
+                'message' => 'La asignacion de usuarios a departamentos guardada con éxito.'
+            ];
+        }else{
+            $response = [
+                'status' => false,
+                'message' => 'No existen datos para procesar.'
+            ];
+
+        }
+
+        return response()->json($response, 200);
+    }
+
     public function updatePassword(Request $request)
     {
         $requestUser = (object) $request->usuario;
@@ -74,6 +147,7 @@ class UsuarioController extends Controller
             $newPersona->num_celular = $data->num_celular;
             $newPersona->direccion = strtolower($data->direccion);
             $newPersona->estado = 'A';
+            $newPersona->sexo_id = $data->sexo_id;
 
             if ($newPersona->save()) {
                 $response = ['status' => true, 'message' => 'Se registro con exito', 'persona' => $newPersona];
@@ -117,7 +191,6 @@ class UsuarioController extends Controller
     } 
 
     
-
     public function deleteUser($user_id)
     {
         $dataUser = User::find(intval($user_id));
@@ -173,6 +246,7 @@ class UsuarioController extends Controller
                 $dataPerson->apellidos = $requestPerson->apellidos;
                 $dataPerson->num_celular = $requestPerson->num_celular;
                 $dataPerson->direccion = $requestPerson->direccion;
+                $dataPerson->sexo_id =  $requestPerson->sexo_id;
                 $dataPerson->save();
                 $dataUser->save();
 

@@ -18,8 +18,7 @@ class ToolController extends Controller
 
             if($existeArchivo){
                 $file = Storage::disk($carpeta)->get($archivo);
-                //return new Response($file,200);
-                return response()->json($file,200);
+                return new Response($file,200);
             }else{
                 $response=[
                     'status' => false,

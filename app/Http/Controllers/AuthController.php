@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\{Trabajador,User};
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Hash;
@@ -22,6 +22,7 @@ class AuthController extends Controller
         $this->permisoCtrl = new PermisoController();
     }
 
+
     public function registro(Request $request)
     { //app movil
         try {
@@ -37,13 +38,22 @@ class AuthController extends Controller
                 $persona_id = $responsePersona['persona']->id;
                 $encriptarPassword = Hash::make($requestUser['password']);
 
+                $trabajador = 4;
+
                 $user = User::create([
                     'persona_id' => $persona_id,
-                    'rol_id' => 4,
+                    'rol_id' => $trabajador,
                     'email' => $requestUser['email'],
                     'password' => $encriptarPassword,
                     'imagen' => 'user-default.jpg',
+                    'estado' => 'A'
                 ]);
+
+                $trabajador = Trabajador::create([
+                    'persona_id' => $persona_id,
+                    'status' => 'A'
+                ]);
+
 
                 $token = JWTAuth::fromUser($user);
 

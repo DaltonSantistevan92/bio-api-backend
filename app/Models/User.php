@@ -23,7 +23,7 @@ class User extends Authenticatable implements JWTSubject
      */
 
     protected $table = 'users';
-    protected $fillable = ['persona_id','rol_id','name','email','password','imagen','estado'];
+    protected $fillable = ['persona_id','rol_id','departamento_id','name','email','password','imagen','estado'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -50,6 +50,10 @@ class User extends Authenticatable implements JWTSubject
 
     public function asistencia(){
         return $this->hasMany(Asistencia::class);
+    }
+
+    public function departamento(){
+        return $this->belongsTo(Departamento::class);
     }
 
     public function getJWTIdentifier(){

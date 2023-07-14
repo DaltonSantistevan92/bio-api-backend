@@ -3,12 +3,58 @@
 namespace App\Http\Controllers;
 
 use App\Models\Departamento;
+use App\Models\User;
 use App\Models\Geolocalizacion_Departamento;
 use Illuminate\Http\Request;
 
 class DepartamentoController extends Controller
 {
-    //
+
+    
+
+    //Cargar usuarios sin asignacion de departamentos
+    public function getAllUsuariosSinDepartamentos(){
+        $response = [];
+        $sinDepartamentos = User::whereNull('departamento_id')->get();
+
+        if($sinDepartamentos->count() > 0){
+           foreach($sinDepartamentos  as $sd){
+            $sd->persona;
+            $sd->rol;
+           }
+
+            $response = [
+                'status' => true, 
+                'message' => 'Usuarios sin asignación de departamentos cargados con éxito.', 
+                'data' => $sinDepartamentos 
+            ];
+        }else{
+            $response = ['status' => false, 'message' => 'No hay asignaciones a departamentos pendientes.', 'data' => null ];
+        }
+        return response()->json($response);
+    }
+
+    //Listar departamentos activos
+    public function getAllDepartamentosActivos(){
+        $response = [];
+        $departamentos = Departamento::where('estado', '=', 'A')->get();
+
+        if($departamentos->count() > 0){
+
+            foreach($departamentos as $item){
+                $item->geolocalizacion_departamento;
+            }
+
+            $response = [
+                'status' => true, 
+                'message' => 'Departamentos activos cargadas con éxito.', 
+                'data' => $departamentos 
+            ];
+        }else{
+            $response = ['status' => false, 'message' => 'No hay departamentos activos.', 'data' => null ];
+        }
+        return response()->json($response);
+    }
   
     public function getAllDepartamentos(){
         $response = [];

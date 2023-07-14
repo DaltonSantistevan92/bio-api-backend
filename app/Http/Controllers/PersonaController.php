@@ -40,6 +40,7 @@ class PersonaController extends Controller
             $newPersona = new Persona();
             $newPersona->nombres = $data['nombres'];
             $newPersona->estado = 'A';
+            $newPersona->sexo_id = $data['sexo_id'];
 
             if ($newPersona->save()) {
                 $response = [ 'status'=> true, 'message' => 'Se registro con exito', 'persona' => $newPersona ];

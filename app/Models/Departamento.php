@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\{Geolocalizacion_Departamento, Asistencias_Departamentos};
+use App\Models\{Geolocalizacion_Departamento, Asistencias_Departamentos,User };
 
 class Departamento extends Model
 {
@@ -22,4 +22,11 @@ class Departamento extends Model
     public function asistencias_departamento(){
         return $this->hasMany(Asistencias_Departamentos::class);
     }
+
+    public function user(){
+        return $this->hasMany(User::class);
+    }
+
+ 
+    
 }
