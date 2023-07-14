@@ -12,7 +12,7 @@ class Asistencia extends Model
     use HasFactory;
 
     protected $table = "asistencias";
-    protected $fillable = ['user_id','tipo_asistencia_id','tipo_registro_id','fecha','hora','estado'];
+    protected $fillable = ['user_id','tipo_asistencia_id','tipo_registro_id','fecha','hora','atraso','estado'];
     public $timestamps = false;
 
     public function user(){

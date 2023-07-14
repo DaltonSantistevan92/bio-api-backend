@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Asistencia;
 use App\Models\Asistencias_Departamentos;
 use App\Models\Asistencia_Eventos;
+use App\Models\Configuracion;
 use App\Models\Evento;
 use App\Models\Tipo_Asistencia;
 use App\Models\User;
@@ -150,6 +151,117 @@ class AsistenciaController extends Controller
         return response()->json($response);
     }
 
+    public function registrarAsistencia2(Request $request)
+    {
+        $requestAsistencia = (object) $request->asistencia;
+        $requestUbicaciones = (object) $request->ubicacion;
+        $response = [];
+
+        if ($requestAsistencia) {
+
+            if ($requestAsistencia->tipo_asistencia_id === 1) { //asistencia
+
+                $requUbicacion = $this->geoDepCtrl->validarGeolocalizacion($requestUbicaciones);
+
+                if ($requUbicacion['status'] == true) { //Validar con las ubicaciones  de la table geolocalizacion
+                    $departamento_id = $requUbicacion['ubicacion']->departamento_id;
+
+                    $newAsistencia = $this->saveAsistencia($requestAsistencia);
+
+                    $existeTipo = Asistencia::where('user_id', $requestAsistencia->user_id)
+                        ->where('tipo_asistencia_id', '=', 1)
+                        ->where('fecha', date('Y-m-d'))
+                        ->get()->count();
+
+                    if ($existeTipo === 4) {
+                        $response = [
+                            'status' => false,
+                            'message' => 'Cumplio sus horas laborables el dia : ' . date('Y-m-d'),
+                        ];
+                    } else {
+                        if ($newAsistencia->save()) {
+                            $respUbicacion = $this->ubicacionCtrl->registrarUbicaciones($newAsistencia->id, $requestUbicaciones);
+
+                            $registraAsitenciaDepartamento = new Asistencias_Departamentos();
+                            $registraAsitenciaDepartamento->asistencia_id = $newAsistencia->id;
+                            $registraAsitenciaDepartamento->departamento_id = $departamento_id;
+                            $registraAsitenciaDepartamento->save();
+
+                            $response = [
+                                'status' => true,
+                                'message' => 'La asistencia se registro correctamente',
+                                'data' => [
+                                    'asistencia' => $newAsistencia,
+                                    'ubicacion' => $respUbicacion,
+                                    'asistencia_departamento' => $registraAsitenciaDepartamento,
+                                ],
+                            ];
+                        } else {
+                            $response = [
+                                'status' => false,
+                                'message' => 'No se puede registrar la asistencia',
+                                'data' => null,
+                            ];
+                        }
+                    }
+                } else {
+                    $response = [
+                        'status' => false,
+                        'message' => $requUbicacion['message'],
+                    ];
+                }
+            } else { //evento
+                $returnEvento = $this->eventnCtrl->buscarEventos(date('Y-m-d'));
+
+                if ($returnEvento['status'] === true) { //si hay eventos
+                    $newAsistencia = $this->saveAsistencia($requestAsistencia);
+                    $evento_id = $returnEvento['evento_id'];
+
+                    $existeTipo = Asistencia::where('user_id', $requestAsistencia->user_id)
+                        ->where('tipo_asistencia_id', '=', 2)
+                        ->where('fecha', date('Y-m-d'))
+                        ->get()->count();
+
+                    if ($existeTipo === 4) {
+                        $response = [
+                            'status' => false,
+                            'message' => 'Cumplio sus horas laborables el dia : ' . date('Y-m-d'),
+                        ];
+                    } else {
+                        if ($newAsistencia->save()) {
+                            $newAsistenciaEventos = new Asistencia_Eventos();
+                            $newAsistenciaEventos->asistencia_id = $newAsistencia->id;
+                            $newAsistenciaEventos->evento_id = $evento_id;
+                            $newAsistenciaEventos->save();
+
+                            $response = [
+                                'status' => true,
+                                'message' => 'La asistencia se registro correctamente',
+                            ];
+                        } else {
+                            $response = [
+                                'status' => false,
+                                'message' => 'No se pudo registrar la asistencia',
+                            ];
+                        }
+                    }
+                } else { //no hay eventos
+                    $response = [
+                        'status' => false,
+                        'message' => $returnEvento['message'],
+                    ];
+                }
+            }
+        } else {
+            $response = [
+                'status' => false,
+                'message' => 'No hay datos para procesar',
+                'data' => null,
+            ];
+        }
+        return response()->json($response);
+    }
+
     public function registrarAsistencia(Request $request)
     {
         $requestAsistencia = (object) $request->asistencia;
@@ -277,10 +389,40 @@ class AsistenciaController extends Controller
         $newAsistencia->tipo_registro_id = $requestAsistencia->tipo_registro_id; //1 entrada
         $newAsistencia->fecha = date('Y-m-d');
         $newAsistencia->hora = date('H:i:s');
+        $newAsistencia->atraso = $this->validadAtraso($newAsistencia);
         $newAsistencia->estado = 'A';
         return $newAsistencia;
     }
 
+
+    private function validadAtraso($newAsistencia){
+        $entrada = 1;
+        if ($newAsistencia->tipo_registro_id == $entrada) {
+            $configuraciones = Configuracion::all();
+            $horaAtraso = $configuraciones[0]->hora_atraso;  //08:15
+
+            $existeUserRegistro = Asistencia::where('user_id',$newAsistencia->user_id)
+                                ->where('tipo_registro_id',$entrada)
+                                ->where('fecha',$newAsistencia->fecha)->get()->first();
+
+            if ($existeUserRegistro) {
+                return 'N'; // No se aplica atraso adicional
+            }
+
+            // Obtener la hora actual y la hora de atraso
+            $horaActual = strtotime($newAsistencia->hora);
+            $horaAtraso = strtotime($horaAtraso);
+
+            // Comparar las horas
+            if ($horaActual > $horaAtraso) {
+                return 'S';
+            } else {
+                return 'N'; 
+            }
+        }
+        return 'N'; 
+    }
+    
     public function reporteTrabajador($user_id, $f_inicio, $f_fin, $tipo_asistencia_id)
     { //solo trabajador
         $response = [];
@@ -485,18 +627,6 @@ class AsistenciaController extends Controller
             return $countData->values();
         });
 
-        // $asistenciasData2 = $asistenciasGrouped->map(function ($items) {
-        //     $countData = $items->countBy('tipo_registro_id');
-
-        //     return $countData->values()->toArray();
-        // })->values()->toArray();
-
-        // $asistenciasData3 = $asistenciasGrouped->flatMap(function ($items) {
-        //     $countData = $items->countBy('tipo_registro_id');
-
-        //     return $countData->values();
-        // })->toArray();
-
         $sumas = [];
         foreach ($asistenciasData as $subarreglo) {
             $suma = 0;
@@ -515,72 +645,84 @@ class AsistenciaController extends Controller
             $sumXY = 0;
             $sumX2 = 0;
             $margen = 0.5;
-
-            foreach ($sumas as $asi) {
-                $xProm += $i;
-                $yProm += $asi;
-
-                $xy = $i * $asi;
-                $x2 = pow($i, 2);
-
-                $sumXY += $xy;
-                $sumX2 += $x2;
+            
+            foreach ($sumas as $asi) {//4
+                $xProm += $i;//1
+                $yProm += $asi;//4
+                
+                $xy = $i * $asi;//4
+                $x2 = pow($i, 2);//1
+                
+                $sumXY += $xy;//4
+                $sumX2 += $x2;//1
                 $i++;
             }
+            
+            $xProm = ($xProm / $n);//1
+            $yProm = ($yProm / $n);//4
+           
+            $data1 = ($sumXY - ($n * $xProm * $yProm));
 
-            $xProm = ($xProm / $n);
-            $yProm = ($yProm / $n);
+            if ($data1 != 0) {
+                $b = $data1 / (($sumX2) - ($n * $xProm * $xProm));
 
-            $b = (($sumXY) - ($n * $xProm * $yProm)) / (($sumX2) - ($n * $xProm * $xProm));
-            $a = $yProm - ($b * $xProm);
+                $a = $yProm - ($b * $xProm);
 
-            //Evaluar mínimo y máximo
-            $fx1 = $a + $b * 1;
-            $fxn = $a + $b * count($sumas);
-            $proyeccion = $a + $b * (count($sumas) + 1);
-
-            $response = [
-                'status' => true,
-                'data' => [
-                    'datos' => $sumas,
-                    'fecha' => $asistenciasGrouped->keys(),
-                    'puntos' => [
-                        'inicio' => [
-                            'x' => 1, 'y' => round($fx1, 2),
-                        ],
-                        'fin' => [
-                            'x' => count($sumas), 'y' => round($fxn, 2),
-                        ],
-                        'proyeccion' => [
-                            'x' => count($sumas) + 1,
-                            'y' => round(($proyeccion), 2),
-                        ],
-                    ],
-                    'constantes' => [
-                        'a' => round($a, 2),
-                        'b' => $b,
-                    ],
-                    'promedios' => [
-                        'x' => $xProm,
-                        'y' => round($yProm, 2),
-                    ],
-                    'ecuacion' => [
-                        'f(x)' => round($a, 2) . ' + (' . $b . ')(' . $xProm . ')',
-                        'signo' => ($b > 0) ? '+' : '-',
-                        'margen' => [
-                            'x' => [
-                                'minimo' => 1 - $margen,
-                                'maximo' => count($sumas) + $margen,
+                //Evaluar mínimo y máximo
+                $fx1 = $a + $b * 1;
+                $fxn = $a + $b * count($sumas);
+                $proyeccion = $a + $b * (count($sumas) + 1);
+    
+                $response = [
+                    'status' => true,
+                    'data' => [
+                        'datos' => $sumas,
+                        'fecha' => $asistenciasGrouped->keys(),
+                        'puntos' => [
+                            'inicio' => [
+                                'x' => 1, 'y' => round($fx1, 2),
                             ],
-                            'y' => [
-                                'minimo' => 0,
+                            'fin' => [
+                                'x' => count($sumas), 'y' => round($fxn, 2),
+                            ],
+                            'proyeccion' => [
+                                'x' => count($sumas) + 1,
+                                'y' => round(($proyeccion), 2),
                             ],
                         ],
+                        'constantes' => [
+                            'a' => round($a, 2),
+                            'b' => $b,
+                        ],
+                        'promedios' => [
+                            'x' => $xProm,
+                            'y' => round($yProm, 2),
+                        ],
+                        'ecuacion' => [
+                            'f(x)' => round($a, 2) . ' + (' . $b . ')(' . $xProm . ')',
+                            'signo' => ($b > 0) ? '+' : '-',
+                            'margen' => [
+                                'x' => [
+                                    'minimo' => 1 - $margen,
+                                    'maximo' => count($sumas) + $margen,
+                                ],
+                                'y' => [
+                                    'minimo' => 0,
+                                ],
+                            ],
+                        ],
+    
                     ],
-
-                ],
-            ];
-
+                ];
+            } else {
+                $response = [
+                    'status' => false,
+                    'data' => [],
+                    'constantes' => [],
+                    'promedios' => [],
+                    'ecuacion' => [],
+                ];
+            }
         } else {
             $response = [
                 'status' => false,
@@ -757,10 +899,15 @@ class AsistenciaController extends Controller
                 return $this->convertirASegundos($item->horas_extras);
             });
 
+            $horaMin = date('H:i', strtotime($this->convertirAHoras($totalHorasExtras)));
+
+            $decimalHora = collect($horaMin)->map(function ($elem) {
+                    return str_replace(':','.',$elem);
+            })->first();
+
             return [
                 'name' => $group->first()->departamento_nombre,
-                'y' =>  intval(date('H', strtotime($this->convertirAHoras($totalHorasExtras))))
-                // round(strtotime($this->convertirAHoras($totalHorasExtras)) / 3600)
+                'y' =>  round(doubleval($decimalHora),2),
             ];
 
             
