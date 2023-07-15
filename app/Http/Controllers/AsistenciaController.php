@@ -394,7 +394,6 @@ class AsistenciaController extends Controller
         return $newAsistencia;
     }
 
-
     private function validadAtraso($newAsistencia){
         $entrada = 1;
         if ($newAsistencia->tipo_registro_id == $entrada) {
@@ -735,67 +734,6 @@ class AsistenciaController extends Controller
         return response()->json($response);
     }
 
-    /*
-    SELECT
-    user_id,
-    fecha,
-    TRIM(TRAILING '.000000' FROM SEC_TO_TIME(ABS(SUM(TIME_TO_SEC(horas_trabajadas))))) AS horas_trabajadas,
-    TRIM(TRAILING '.000000' FROM SEC_TO_TIME(SUM(TIME_TO_SEC(horas_extras)))) AS horas_extras,
-    TRIM(TRAILING '.000000' FROM SEC_TO_TIME(ABS(SUM(TIME_TO_SEC(horas_trabajadas))) + TIME_TO_SEC(horas_extras))) AS total_horas_trabajadas
-    FROM (
-    SELECT
-    user_id,
-    fecha,
-    TIMEDIFF(
-    MIN(CASE WHEN tipo_registro_id = 1 THEN hora END),
-    MAX(CASE WHEN tipo_registro_id = 2 THEN hora END)
-    ) AS horas_trabajadas,
-    CASE
-    WHEN TIMEDIFF(MAX(CASE WHEN tipo_registro_id = 2 THEN hora END), MIN(CASE WHEN tipo_registro_id = 1 THEN hora END)) > '08:00:00' THEN TIMEDIFF(MAX(CASE WHEN tipo_registro_id = 2 THEN hora END), ADDTIME(c.hora_salida, '01:00:00'))
-    ELSE '00:00:00'
-    END AS horas_extras
-    FROM asistencias a
-    CROSS JOIN configuraciones c
-    WHERE a.user_id = 19 -- Usuario específico
-    AND fecha BETWEEN '2023-01-01' AND '2023-06-30' -- Fecha específica
-    GROUP BY user_id, fecha
-    ) AS t
-    GROUP BY user_id, fecha;
-     */
-
-    // public function horasTrabajadas($user_id, $fecha_inicio, $fecha_fin)
-    // {
-    //     $results = DB::select("
-    //     SELECT
-    //         user_id,
-    //         fecha,
-    //         TRIM(TRAILING '.000000' FROM SEC_TO_TIME(ABS(SUM(TIME_TO_SEC(horas_trabajadas))))) AS horas_trabajadas,
-    //         TRIM(TRAILING '.000000' FROM SEC_TO_TIME(SUM(TIME_TO_SEC(horas_extras)))) AS horas_extras,
-    //         TRIM(TRAILING '.000000' FROM SEC_TO_TIME(ABS(SUM(TIME_TO_SEC(horas_trabajadas))) + TIME_TO_SEC(horas_extras))) AS total_horas_trabajadas
-    //     FROM (
-    //         SELECT
-    //         user_id,
-    //         fecha,
-    //         TIMEDIFF(MIN(CASE WHEN tipo_registro_id = 1 THEN hora END), MAX(CASE WHEN tipo_registro_id = 2 THEN hora END)) AS horas_trabajadas,
-    //         CASE
-    //             WHEN TIMEDIFF(MAX(CASE WHEN tipo_registro_id = 2 THEN hora END), MIN(CASE WHEN tipo_registro_id = 1 THEN hora END)) > '08:00:00' THEN TIMEDIFF(MAX(CASE WHEN tipo_registro_id = 2 THEN hora END), ADDTIME(c.hora_salida, '01:00:00'))
-    //             ELSE '00:00:00'
-    //         END AS horas_extras
-    //         FROM asistencias a
-    //         CROSS JOIN configuraciones c
-    //         WHERE a.user_id = " . $user_id . " 
-    //         AND fecha BETWEEN '" . $fecha_inicio . "' AND '" . $fecha_fin . "'
-    //         GROUP BY user_id, fecha
-    //     ) AS t
-    //     GROUP BY user_id, fecha ");
-
-    //     return response()->json($results);
-    // }
-
-    
-
-
-
     public function horasTrabajadas($user_id, $fecha_inicio, $fecha_fin)
     {
         $results = DB::select("
@@ -943,6 +881,51 @@ class AsistenciaController extends Controller
         $minutos = floor(($segundos % 3600) / 60);
         $segundos = $segundos % 60;
         return sprintf("%02d:%02d:%02d", $horas, $minutos, $segundos);
+    }
+
+
+    public function puntalesAtrasadosAsistencia($fecha_inicio,$fecha_fin){
+        $resultados = DB::select("
+            SELECT 
+                a.user_id,
+                CONCAT(per.nombres, ' ', per.apellidos) AS usuarios,
+                ta.type as tipoAsistencia,
+                tr.tipo as tipo,
+                a.fecha,
+                a.hora,
+                a.atraso,
+                a.estado
+            FROM asistencias a
+            INNER JOIN users u ON u.id = a.user_id
+            INNER JOIN personas per ON per.id = u.persona_id
+            INNER JOIN tipos_asistencias ta ON ta.id = a.tipo_asistencia_id
+            INNER JOIN tipos_registros tr ON tr.id = a.tipo_registro_id
+            WHERE a.fecha BETWEEN :fecha_inicio AND :fecha_fin
+            AND a.atraso = 'N' AND tr.id = 1
+            GROUP BY a.user_id, a.fecha, per.nombres, per.apellidos, ta.type, a.hora, a.atraso, a.estado,  tr.tipo
+            HAVING TIME(a.hora) BETWEEN '08:00:00' AND '08:15:00'
+        ", [
+            'fecha_inicio' => $fecha_inicio,
+            'fecha_fin' => $fecha_fin
+        ]);
+
+        $response = [];
+
+        if (!empty($resultados)) {
+            $data = collect($resultados);
+            $response = [
+                'status' => true,
+                'data' => $data->toArray()
+            ];
+        } else {
+            $response = [
+                'status' => false,
+                'data' => null
+            ];
+        }
+
+        return response()->json($response);
+
     }
 
 

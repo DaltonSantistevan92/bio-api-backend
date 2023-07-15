@@ -125,6 +125,7 @@ Route::middleware('jwt.verify')->group( function () {
 
     //Reportes
     Route::get('horasTrabajadas/{user_id}/{fecha_inicio}/{fecha_fin}', [AsistenciaController::class, 'horasTrabajadas']);
+    Route::get('puntualesAtrasadoAsistencia/{fecha_inicio}/{fecha_fin}', [AsistenciaController::class, 'puntalesAtrasadosAsistencia']);
 
     //KPI
     Route::get('horasExtrasAgrupadosXDepartamentoKpi/{fecha_inicio}/{fecha_fin}', [AsistenciaController::class, 'horasExtrasAgrupadosXDepartamentoKpi']);
