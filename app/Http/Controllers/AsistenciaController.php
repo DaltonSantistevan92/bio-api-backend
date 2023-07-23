@@ -928,6 +928,41 @@ class AsistenciaController extends Controller
 
     }
 
+    public function obtenerIndiceAtrasoPorDepartamento()
+    {
+        $resultados = DB::table('asistencias')
+            ->select('departamentos.id AS departamento_id', 'departamentos.nombre AS departamento_nombre')
+            ->selectRaw('(SUM(CASE WHEN asistencias.atraso = "S" THEN 1 ELSE 0 END) / COUNT(*)) * 100 AS indice_atraso_departamento')
+            ->join('users', 'asistencias.user_id', '=', 'users.id')
+            ->join('departamentos', 'users.departamento_id', '=', 'departamentos.id')
+            ->groupBy('departamentos.id', 'departamentos.nombre')
+            ->get();
+
+        $response  = [];
+
+        if ($resultados->count() > 0) {
+            // Obtener arrays de departamentos e índices de atraso
+            $departamentos = $resultados->pluck('departamento_nombre')->toArray();
+            $indicesAtraso = $resultados->pluck('indice_atraso_departamento')->map(function ($indice) {
+                return number_format($indice, 4); // Redondear a 4 decimales
+            })->toArray();
+
+            $response = [
+                'status' => true,
+                'data' => [
+                    'labels' => $departamentos,
+                    'datos' => $indicesAtraso
+                ]
+            ];
+        } else {
+            $response = [
+                'status' => false,
+                'data' => null
+            ];
+        }
+        return response()->json($response);
+    }
+
 
 
 }

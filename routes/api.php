@@ -130,6 +130,11 @@ Route::middleware('jwt.verify')->group( function () {
     //KPI
     Route::get('horasExtrasAgrupadosXDepartamentoKpi/{fecha_inicio}/{fecha_fin}', [AsistenciaController::class, 'horasExtrasAgrupadosXDepartamentoKpi']);
 
+    Route::get('obtenerIndiceAtrasoPorDepartamento', [AsistenciaController::class, 'obtenerIndiceAtrasoPorDepartamento']);
+
+
+
+
 
 
 
